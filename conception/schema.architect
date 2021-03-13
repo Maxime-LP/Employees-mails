@@ -90,13 +90,13 @@
   </table>
   <relationships>
    <relationship id="REL22" populated="true" UUID="b176fdcb-753b-44e1-ba81-d168d6acca7e" deferrability="7" deleteRule="0" fk-table-ref="TAB8" fkCardinality="6" identifying="false" name="mailbox_employee_fk" physicalName="mailbox_employee_fk" pk-table-ref="TAB1" pkCardinality="2" updateRule="0" >
-    <column-mapping id="CMP23" populated="true" UUID="a3c64b20-205f-412e-a4ce-58be0f9a09b8" fk-column-ref="COL10" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL2" />
+    <column-mapping id="CMP23" populated="true" UUID="39912ebe-5dca-48ea-8f7b-7668edd1bfdc" fk-column-ref="COL10" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL2" />
    </relationship>
    <relationship id="REL24" populated="true" UUID="7a6b1ae2-ff2b-4fb4-b52a-3ce7de4d5381" deferrability="7" deleteRule="0" fk-table-ref="TAB13" fkCardinality="6" identifying="true" name="mailbox_mail_fk" physicalName="mailbox_mail_fk" pk-table-ref="TAB8" pkCardinality="2" updateRule="0" >
-    <column-mapping id="CMP25" populated="true" UUID="1d5a7a4d-4068-4978-90a6-86f1adaa68b6" fk-column-ref="COL17" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
+    <column-mapping id="CMP25" populated="true" UUID="7fa743fe-2ab8-4cad-a8e8-5f6ea01a23c3" fk-column-ref="COL17" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
    </relationship>
    <relationship id="REL26" populated="true" UUID="ea1f77af-bbc8-4464-be74-0a6e58b8edca" deferrability="7" deleteRule="0" fk-table-ref="TAB13" fkCardinality="6" identifying="true" name="mailbox_mail_fk1" physicalName="mailbox_mail_fk1" pk-table-ref="TAB8" pkCardinality="2" updateRule="0" >
-    <column-mapping id="CMP27" populated="true" UUID="b9ffd406-091b-493c-9531-34013203f288" fk-column-ref="COL16" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
+    <column-mapping id="CMP27" populated="true" UUID="c9a5dc20-7d7b-4f1c-bd98-4b34eedcec6c" fk-column-ref="COL16" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
    </relationship>
    <relationship id="REL28" populated="true" UUID="731858c4-cc90-44ea-86aa-c9d13a959cae" deferrability="7" deleteRule="2" fk-table-ref="TAB13" fkCardinality="3" identifying="false" name="mail_mail_fk" physicalName="mail_mail_fk" pk-table-ref="TAB13" pkCardinality="7" updateRule="0" >
     <column-mapping id="CMP29" populated="true" UUID="3a0f4d4e-5a34-4bf5-9288-aa25cf78adfa" fk-column-ref="COL18" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL14" />
