@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'a5(jw_yau7yz&5s6!3msa8@%ux=153lcadqs6u3#yv#2(4_apd'
+SECRET_KEY = '%6l+j6o$a$6&&=9c995-04zdih!@w6b_h$s5own1@+qz7)gt_h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'enro.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'enrodatabase',
+        'USER': 'enroadmin',
+        'PASSWORD': 'supersafepassword',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 

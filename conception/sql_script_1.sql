@@ -1,3 +1,5 @@
+CREATE ROLE enroadmin WITH LOGIN PASSWORD 'supersafepassword';
+CREATE DATABASE enrodatabase OWNER enroadmin;
 
 CREATE TABLE employee (
                 id_employee INTEGER NOT NULL,
@@ -8,13 +10,11 @@ CREATE TABLE employee (
 );
 COMMENT ON TABLE employee IS 'Upon deleting an employee, also deletes their mailboxes and mails (sent by or to them)';
 
-
 CREATE TABLE mailbox (
                 mail_adress VARCHAR NOT NULL,
                 id_employee INTEGER NOT NULL,
                 CONSTRAINT mail_adress PRIMARY KEY (mail_adress)
 );
-
 
 CREATE TABLE mail (
                 id_mail INTEGER NOT NULL,
@@ -25,7 +25,6 @@ CREATE TABLE mail (
                 id_resp INTEGER,
                 CONSTRAINT id_mail PRIMARY KEY (id_mail)
 );
-
 
 ALTER TABLE mailbox ADD CONSTRAINT mailbox_employee_fk
 FOREIGN KEY (id_employee)
