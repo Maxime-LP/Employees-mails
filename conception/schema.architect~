@@ -42,7 +42,7 @@
     <column id="COL9" populated="true" UUID="cdd9fd77-c75a-4a3b-9776-fcb27fd7351c" autoIncrement="false" autoIncrementSequenceName="mailbox_mail_adress_seq" defaultValue="" name="mail_adress" nullable="0" physicalName="mail_adress" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL10" populated="true" UUID="5a9e727d-76bc-4e15-8037-d6975e5dbcf9" autoIncrement="false" autoIncrementSequenceName="mailbox_id_employee_seq" defaultValue="" name="id_employee" nullable="0" physicalName="id_employee" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL10" populated="true" UUID="5a9e727d-76bc-4e15-8037-d6975e5dbcf9" autoIncrement="false" autoIncrementSequenceName="mailbox_id_employee_seq" defaultValue="" name="id_employee" nullable="0" physicalName="id_employee" precision="0" referenceCount="2" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
     </folder>
@@ -62,22 +62,19 @@
     <column id="COL14" populated="true" UUID="24cc77de-bbe1-4059-8472-4a32b88321eb" autoIncrement="false" autoIncrementSequenceName="mail_id_mail_seq" defaultValue="" name="id_mail" nullable="0" physicalName="id_mail" precision="0" primaryKeySeq="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
-    <column id="COL15" populated="true" UUID="fc0b41fd-f1ac-4059-beda-5e002c6cf134" autoIncrement="false" autoIncrementSequenceName="mail_mail_adress_seq" defaultValue="" name="mail_adress" nullable="0" physicalName="mail_adress" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
+    <column id="COL15" populated="true" UUID="ed9060a1-1361-486b-be44-5ef23afebf7b" autoIncrement="false" autoIncrementSequenceName="mail_mail_date_seq" defaultValue="" name="mail_date" nullable="0" physicalName="mail_date" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="91" userDefinedTypeUUID="ee349be3-6af2-46e1-b305-975f5354b009" >
      <remarks></remarks>
     </column>
-    <column id="COL16" populated="true" UUID="ed9060a1-1361-486b-be44-5ef23afebf7b" autoIncrement="false" autoIncrementSequenceName="mail_mail_date_seq" defaultValue="" name="mail_date" nullable="0" physicalName="mail_date" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="91" userDefinedTypeUUID="ee349be3-6af2-46e1-b305-975f5354b009" >
+    <column id="COL16" populated="true" UUID="b203bdea-7d58-4d39-8565-a63984bd7bac" autoIncrement="false" autoIncrementSequenceName="mail_rec_seq" defaultValue="" name="mail_rec" nullable="0" physicalName="mail_rec" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL17" populated="true" UUID="f7ac86a3-7d06-48fa-897a-e9cf374854e7" autoIncrement="false" autoIncrementSequenceName="mail_id_exp_seq" defaultValue="" name="id_exp" nullable="0" physicalName="id_exp" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL17" populated="true" UUID="cb55b879-94a5-4ea8-a451-be8e1cf50eb2" autoIncrement="false" autoIncrementSequenceName="mailbox_mail_expadress_seq" defaultValue="" name="mail_exp" nullable="0" physicalName="mail_exp" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL18" populated="true" UUID="1d924749-56dc-40f2-9cce-98ef64c33fc0" autoIncrement="false" autoIncrementSequenceName="mail_id_rec_seq" defaultValue="" name="id_rec" nullable="0" physicalName="id_rec" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL18" populated="true" UUID="a896632d-107b-40d9-a3f4-b2c99ff9a319" autoIncrement="false" autoIncrementSequenceName="mail_id_mail_seq" defaultValue="" name="id_prec" nullable="1" physicalName="id_prec" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
-    <column id="COL19" populated="true" UUID="01fa2cad-c996-45b9-9136-b6fb74101b74" autoIncrement="false" autoIncrementSequenceName="mail_id_prec_seq" defaultValue="" name="id_prec" nullable="1" physicalName="id_prec" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
-     <remarks></remarks>
-    </column>
-    <column id="COL20" populated="true" UUID="42641502-0ee4-4b0d-9326-242d0899e71d" autoIncrement="false" autoIncrementSequenceName="mail_id_resp_seq" defaultValue="" name="id_resp" nullable="1" physicalName="id_resp" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
+    <column id="COL19" populated="true" UUID="531cb0f2-699a-457c-b12f-519cf503d049" autoIncrement="false" autoIncrementSequenceName="mail_id_mail_seq" defaultValue="" name="id_resp" nullable="1" physicalName="id_resp" precision="0" referenceCount="1" scale="0" sourceDataTypeName="UserDefinedSQLType" type="4" userDefinedTypeUUID="63b011c7-c81f-4c75-8271-632b3c87f727" >
      <remarks></remarks>
     </column>
     </folder>
@@ -86,21 +83,41 @@
     <folder id="FOLTAB132" populated="true" name="Imported Keys" physicalName="Imported Keys" type="2">
     </folder>
     <folder id="FOLTAB134" populated="true" name="Indices" physicalName="Indices" type="4">
-    <index id="IDX21" populated="true" UUID="54ba2385-7aed-4a11-a089-c76dd93dbde3" clustered="false" name="id_mail" physicalName="id_mail" primaryKeyIndex="true" unique="false" >
-     <index-column id="IDC22" populated="true" UUID="5e582070-c87c-4abf-9b98-0b418e02e48a" ascendingOrDescending="UNSPECIFIED" column-ref="COL14" name="id_mail" physicalName="id_mail" />
+    <index id="IDX20" populated="true" UUID="54ba2385-7aed-4a11-a089-c76dd93dbde3" clustered="false" name="id_mail" physicalName="id_mail" primaryKeyIndex="true" unique="false" >
+     <index-column id="IDC21" populated="true" UUID="5e582070-c87c-4abf-9b98-0b418e02e48a" ascendingOrDescending="UNSPECIFIED" column-ref="COL14" name="id_mail" physicalName="id_mail" />
     </index>
    </folder>
   </table>
   <relationships>
+   <relationship id="REL22" populated="true" UUID="b176fdcb-753b-44e1-ba81-d168d6acca7e" deferrability="7" deleteRule="3" fk-table-ref="TAB8" fkCardinality="6" identifying="false" name="mailbox_employee_fk" physicalName="mailbox_employee_fk" pk-table-ref="TAB1" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP23" populated="true" UUID="b52717ad-24d1-49af-9196-c9d875b91ada" fk-column-ref="COL10" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL2" />
+   </relationship>
+   <relationship id="REL24" populated="true" UUID="7a6b1ae2-ff2b-4fb4-b52a-3ce7de4d5381" deferrability="7" deleteRule="3" fk-table-ref="TAB13" fkCardinality="6" identifying="true" name="mailbox_mail_fk" physicalName="mailbox_mail_fk" pk-table-ref="TAB8" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP25" populated="true" UUID="ea240ec3-dfbb-41ab-9ac0-80ec6e8423b6" fk-column-ref="COL17" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
+   </relationship>
+   <relationship id="REL26" populated="true" UUID="ea1f77af-bbc8-4464-be74-0a6e58b8edca" deferrability="7" deleteRule="3" fk-table-ref="TAB13" fkCardinality="6" identifying="true" name="mailbox_mail_fk1" physicalName="mailbox_mail_fk1" pk-table-ref="TAB8" pkCardinality="2" updateRule="3" >
+    <column-mapping id="CMP27" populated="true" UUID="6905c7d7-39c9-42f6-a960-9a193a5d054b" fk-column-ref="COL16" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL9" />
+   </relationship>
+   <relationship id="REL28" populated="true" UUID="731858c4-cc90-44ea-86aa-c9d13a959cae" deferrability="7" deleteRule="3" fk-table-ref="TAB13" fkCardinality="3" identifying="false" name="mail_mail_fk" physicalName="mail_mail_fk" pk-table-ref="TAB13" pkCardinality="7" updateRule="3" >
+    <column-mapping id="CMP29" populated="true" UUID="23be9725-3afc-41cb-b590-d6cf8246f061" fk-column-ref="COL18" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL14" />
+   </relationship>
+   <relationship id="REL30" populated="true" UUID="aeaa558c-900c-4903-ae7a-9b4f1f075f14" deferrability="7" deleteRule="3" fk-table-ref="TAB13" fkCardinality="3" identifying="false" name="mail_mail_fk1" physicalName="mail_mail_fk1" pk-table-ref="TAB13" pkCardinality="7" updateRule="3" >
+    <column-mapping id="CMP31" populated="true" UUID="6b13276d-033c-4426-b861-976fc06d7c9b" fk-column-ref="COL19" name="Column Mapping" physicalName="Column Mapping" pk-column-ref="COL14" />
+   </relationship>
   </relationships>
  </target-database>
  <ddl-generator type="ca.sqlpower.architect.ddl.GenericDDLGenerator" allow-connection="true"> </ddl-generator>
  <liquibase-settings useSeparateChangeSets="false" generateId="false" idStart="1"/>
  <create-kettle-job-settings filePath="" jobName="" schemaName="" kettleJoinType="0" savingToFile="true" />
  <play-pen zoom="1.414213562373095" viewportX="0" viewportY="0" relationship-style="rectilinear" names-displayLogicalNames="true" showPrimaryTag="true" showForeignTag="true" showAlternateTag="true" columnVisibility="ALL" relationshipLabelVisibility="true">
-  <table-pane table-ref="TAB1" x="61" y="84" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB8" x="497" y="52" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
-  <table-pane table-ref="TAB13" x="394" y="156" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB1" x="21" y="51" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB8" x="457" y="58" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-pane table-ref="TAB13" x="238" y="221" bgColor="0xeeeeee" fgColor="0x000000" rounded="false" dashed="false"/>
+  <table-link relationship-ref="REL22" pkConnection="0.27058823529411763" fkConnection="0.8421052631578947" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="33"/>
+  <table-link relationship-ref="REL24" pkConnection="0.21171171171171171" fkConnection="0.6814159292035398" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="20"/>
+  <table-link relationship-ref="REL26" pkConnection="0.12162162162162163" fkConnection="0.5486725663716814" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="20"/>
+  <table-link relationship-ref="REL28" pkConnection="0.8260869565217391" fkConnection="0.7876106194690266" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="36"/>
+  <table-link relationship-ref="REL30" pkConnection="0.6618357487922706" fkConnection="0.9469026548672567" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="36"/>
  </play-pen>
  <critic-manager>
   <critic-grouping platformType="Generic" enabled="true">

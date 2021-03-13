@@ -1,28 +1,62 @@
-CREATE TABLE employee(
-    id_employee INT PRIMARY KEY,
-    last_name varchar(40),
-    first_name varchar(40),
-    category varchar(40) NOT NULL
-)
 
-CREATE TABLE mailbox(
-    mail_adress varchar(40) PRIMARY KEY,
-    id_employee INT NOT NULL,
-    
-    CONSTRAINT FOREIGN KEY id_employee REFERENCES employee(id_employee) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY id_mail REFERENCES mail(id_mail) ON DELETE SET NULL ON UPDATE CASCADE
-)
+CREATE TABLE employee (
+                id_employee INTEGER NOT NULL,
+                last_name VARCHAR NOT NULL,
+                first_name VARCHAR,
+                category VARCHAR NOT NULL,
+                CONSTRAINT id_employee PRIMARY KEY (id_employee)
+);
 
-CREATE TABLE mail(
-    id_mail INT PRIMARY KEY,
-    mail_adress varchar(40),
-    mail_date DATE,
-    id_exp INT,
-    id_rec INT,
-    id_prec INT,
-    id_resp INT,
 
-    CONSTRAINT FOREIGN KEY mail_adress REFERENCES mailbox(mail_adress),
-    CONSTRAINT FOREIGN KEY id_exp,id_rec REFERENCES employee(id_employee),
-    CONSTRAINT FOREIGN KEY id_prec,id_resp REFERENCES mail(id_mail)
-)
+CREATE TABLE mailbox (
+                mail_adress VARCHAR NOT NULL,
+                id_employee INTEGER NOT NULL,
+                CONSTRAINT mail_adress PRIMARY KEY (mail_adress)
+);
+
+
+CREATE TABLE mail (
+                id_mail INTEGER NOT NULL,
+                mail_date DATE NOT NULL,
+                mail_rec VARCHAR NOT NULL,
+                mail_exp VARCHAR NOT NULL,
+                id_prec INTEGER,
+                id_resp INTEGER,
+                CONSTRAINT id_mail PRIMARY KEY (id_mail)
+);
+
+
+ALTER TABLE mailbox ADD CONSTRAINT mailbox_employee_fk
+FOREIGN KEY (id_employee)
+REFERENCES employee (id_employee)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE mail ADD CONSTRAINT mailbox_mail_fk
+FOREIGN KEY (mail_exp)
+REFERENCES mailbox (mail_adress)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE mail ADD CONSTRAINT mailbox_mail_fk1
+FOREIGN KEY (mail_rec)
+REFERENCES mailbox (mail_adress)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE mail ADD CONSTRAINT mail_mail_fk
+FOREIGN KEY (id_prec)
+REFERENCES mail (id_mail)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE mail ADD CONSTRAINT mail_mail_fk1
+FOREIGN KEY (id_resp)
+REFERENCES mail (id_mail)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
