@@ -1,5 +1,5 @@
-CREATE ROLE enroadmin WITH LOGIN PASSWORD 'supersafepassword';
-CREATE DATABASE enrodatabase OWNER enroadmin;
+--CREATE ROLE enroadmin WITH LOGIN PASSWORD 'supersafepassword';
+--CREATE DATABASE enrodatabase OWNER enroadmin;
 
 CREATE TABLE employee (
                 id_employee INTEGER NOT NULL,
