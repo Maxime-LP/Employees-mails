@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'enro_app.apps.EnroAppConfig'
 ]
 
 MIDDLEWARE = [
@@ -74,13 +75,9 @@ WSGI_APPLICATION = 'enro.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'enrodatabase',
-        'USER': 'enroadmin',
-        'PASSWORD': 'supersafepassword',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+    'default': { 
+        'ENGINE': 'django.db.backends.sqlite3', 
+        'NAME': BASE_DIR / 'enro_db.sqlite3'
     }
 }
 
