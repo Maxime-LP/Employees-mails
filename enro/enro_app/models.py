@@ -5,6 +5,7 @@ class employee(models.Model):
     last_name = models.CharField(max_length=40),
     first_name = models.CharField(max_length=40),
     
+    #uncomplete choices list
     CATEGORY_CHOICES = [
         ('Employee', 'Employee'),
         ('Director', 'Director')
