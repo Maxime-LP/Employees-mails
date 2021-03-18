@@ -14,7 +14,7 @@ tree = ET.parse(path + '\employes_enron.xml')
 root = tree.getroot()
 
 ###Populating mailbox and mail_address databases
-#already populated
+#uncomment to populate
 """
 for child in root:
     current_mailbox = mailbox()
@@ -43,4 +43,5 @@ for child in root:
 
     current_mailbox.save()
 """
+
 
