@@ -12,9 +12,11 @@ class mail_address(models.Model):
 
 class mail(models.Model):
     mail_date = models.DateTimeField(null=False)
-    recipient_mail = models.ForeignKey(mail_address, on_delete=models.CASCADE,related_name='recipient_mail_id')
-    #il peut y avoir plusieurs destinataires
-    sender_mail = models.ForeignKey(mail_address, on_delete=models.CASCADE,related_name='sender_mail_id')
-    previous_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='previous_mail_id')
-    response_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='response_mail_id')
-    #il peut y avoir plusieurs resp
+    recipient_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='recipient_mail_id') #NULL si le mail va à l'exterieur
+    #il peut y avoir plusieurs destinataires : une instance par destinataire 
+    sender_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='sender_mail_id') #NULL si le mail provient de l'exterieur
+    previous_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
+    response_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
+    #il peut y avoir plusieurs resp : une instance par rep
+
+    #finalement on a une instance par couple sender/recipient
