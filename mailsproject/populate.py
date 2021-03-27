@@ -2,12 +2,9 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mailsproject.settings')
 import django
 django.setup()
-
-from django.utils.timezone import make_aware, datetime, get_current_timezone, tzinfo
-import pytz
+from django.utils.timezone import datetime, timedelta, make_aware, timezone
 from mailsapp1.models import mailbox,mail_address,mail
 import xml.etree.ElementTree as ET
-import zipfile
 import re
 
 ############################
@@ -48,24 +45,19 @@ for child in root:
 """
 
 ############################
-def convert_date(date):
-    #converts a naive datetime into an aware django datetime
-    #e.g. Mon, 4 Dec 2000 02:09:00 -0800 (PST) into 2000-12-04 02:09:00 PST
+def convert_date(input_date):
+    #converts a naive datetime into an aware django datetime in UTC timezone
+    #e.g. 4 Dec 2000 02:09:00 -0800 (PST) into 2000-12-04 10:09:00+00:00
 
-    if date[1] == ' ': #ie if the day has only one digit
-        date = '0'+date
-    months = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
-    timezone = date[28:31] #PDT : UTC - 7 (summer time DST), PST : UTC - 8
-    print(timezone)
-    datet = datetime(
-        year = int(date[7:11]), month = int(months[date[3:6]]), day = int(date[:2]),
-        hour = int(date[12:14]), minute = int(date[15:17]), second = int(date[18:20])
-    )
-    date = make_aware(datet, is_dst=(timezone=='PST'))
-    print(date)
-    date = make_aware(datet, is_dst=(timezone=='PDT'))
-    print(date)
-    return date
+    if input_date[1] == ' ': #ie if the day has only one digit (for string length consistency)
+        input_date = '0'+input_date
+    converted_date = datetime.strptime(input_date[:26], '%d %b %Y %H:%M:%S %z')
+
+    #converting the date in UTC format
+    UTC = timezone(timedelta(hours = 0))
+    converted_date = converted_date.astimezone(UTC)
+
+    return converted_date
 ############################
 
 
@@ -80,19 +72,23 @@ for folder,sub_folder,files in os.walk(data):
         with open(file_path,'r') as file:
             recipients = []
             sender_passed = False
+            date_passed = False
+            recipients_passed = False
             considering_a_forwarded_message = False
 
             #extraction des informations
             for line in file.readlines():
-                if line[:6]=='Date: ' and not considering_a_forwarded_message:
+                if line[:6]=='Date: ' and not date_passed and not considering_a_forwarded_message:
                     date = convert_date(line[11:])
+                    date_passed = True
 
                 elif line[:6]=='From: ' and not sender_passed and not considering_a_forwarded_message:
                     sender = line[6:].replace(" ","")
                     sender_passed = True
 
-                elif line[:4]=="To: " and not considering_a_forwarded_message:
+                elif line[:4]=="To: " and not recipients_passed and not considering_a_forwarded_message:
                     recipients += re.split(',|, ',line[4:-1])
+                    recipients_passed = True
 
                 elif bool(re.match(r"-+ Forwarded by ",line)):
                     considering_a_forwarded_message = True
@@ -103,9 +99,6 @@ for folder,sub_folder,files in os.walk(data):
 
 
             #injection dans la db
-                #
-                #
-                #
             mailbox_tag = re.search(r"\w+-\w",folder).group()
             current_mailbox = mailbox.objects.get(tag=mailbox_tag)
 
