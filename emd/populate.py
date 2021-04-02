@@ -7,9 +7,9 @@ from mailsapp1.models import mailbox,mail_address,mail
 import xml.etree.ElementTree as ET
 import re
 
-############################
+##################################################
 path = r'C:\Users\lepau\OneDrive\Desktop'
-###Populating mailbox and mail_address databases
+###Populate mailbox and mail_address databases
 #uncomment to populate
 """
 #xml file
@@ -43,15 +43,17 @@ for child in root:
 
     current_mailbox.save()
 """
+##################################################
 
 ############################
 def convert_date(input_date):
     #converts a naive datetime into an aware django datetime in UTC timezone
     #e.g. 4 Dec 2000 02:09:00 -0800 (PST) into 2000-12-04 10:09:00+00:00
 
-    if input_date[1] == ' ': #ie if the day has only one digit (for string length consistency)
-        input_date = '0'+input_date
-    converted_date = datetime.strptime(input_date[:26], '%d %b %Y %H:%M:%S %z')
+    if input_date[1] == ' ':            #ie if the day has only one digit
+        input_date = '0'+input_date             #for string length consistency
+
+    converted_date = datetime.strptime(input_date, '%d %b %Y %H:%M:%S %z')
 
     #converting the date in UTC format
     UTC = timezone(timedelta(hours = 0))
@@ -62,7 +64,7 @@ def convert_date(input_date):
 
 
 data = path + r"\mailbox"
-
+#Populate mail database
 for folder,sub_folder,files in os.walk(data):
     for file in files:
         file_path = os.path.join(folder,file)
@@ -71,32 +73,47 @@ for folder,sub_folder,files in os.walk(data):
         #lecture d'un mail
         with open(file_path,'r') as file:
             recipients = []
-            sender_passed = False
-            date_passed = False
-            recipients_passed = False
-            considering_a_forwarded_message = False
+            header = True
+            forwarded = False
 
             #extraction des informations
-            for line in file.readlines():
-                if line[:6]=='Date: ' and not date_passed and not considering_a_forwarded_message:
-                    date = convert_date(line[11:])
-                    date_passed = True
+            lines = iter(file.readlines())
+            for line in lines:
+                if header:
+                    if line[:6]=='Date: ':
+                        date = convert_date(line[11:-7])
 
-                elif line[:6]=='From: ' and not sender_passed and not considering_a_forwarded_message:
-                    sender = line[6:].replace(" ","")
-                    sender_passed = True
+                    elif line[:6]=='From: ':
+                        sender = line[6:].replace(" ","")
 
-                elif line[:4]=="To: " and not recipients_passed and not considering_a_forwarded_message:
-                    recipients += re.split(',|, ',line[4:-1])
-                    recipients_passed = True
+                    elif line[:4]=="To: " or line[:4]=="CC: " or line[:5]=="BCC: ":
+                        recipients += re.split(', |,',line[4:-1])
+                        line = next(lines)
+                        while line[0]=="	":
+                            recipients += re.split(', |,',line[1:-1])
+                            line = next(lines)
 
-                elif bool(re.match(r"-+ Forwarded by ",line)):
-                    considering_a_forwarded_message = True
+                        recipients = [rec for rec in recipients if rec!=""]
 
-                elif considering_a_forwarded_message and bool(re.match(r".+<.+@.+>.+",line)):
-                    previous_sender = re.search(r"<.+@.+>",line).group()[1:-1]
-                    previous_date = re.search(r" on .*",line).group()[4:]
+                    elif line[:12] == "Subject: Re:":
+                        pass
 
+                    elif line[:13] == "Subject: Fwd:":
+                        forwarded = True
+
+                    elif line[:7] == "X-From:":
+                        header = False
+
+                
+                """
+                else:
+                    if bool(re.match(r"-+ Forwarded by ",line)):
+                        forwarded = True
+
+                    elif forwaded and bool(re.match(r".+<.+@.+>.+",line)):
+                        previous_sender = re.search(r"<.+@.+>",line).group()[1:-1]
+                        previous_date = re.search(r" on .*",line).group()[4:]
+                """
 
             #injection dans la db
             mailbox_tag = re.search(r"\w+-\w",folder).group()
@@ -125,4 +142,3 @@ for folder,sub_folder,files in os.walk(data):
                 new_mail.response_mail_id = None
                 new_mail.save()
 
-            #il faudra ensuite regarder s'il existe dans la db un mail avec sender = previous_sender et date = previous_date pour raccorder les deux mails, sinon on le créera
