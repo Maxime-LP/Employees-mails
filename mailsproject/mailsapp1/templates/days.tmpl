@@ -1,0 +1,33 @@
+<!-- fichier pages.tmpl --> 
+<html>
+<head> 
+  <title>Days</title>
+  <style>   
+    table.table  {
+        border-collapse: collapse;
+    }
+    table.table td {
+       border: 1px solid #5555;
+       padding: 0.3em;
+       font-family: "Sans-serif";
+       font-size: 12px;
+    }
+    table.table tr:nth-child(even)  {background: rgb(255, 244, 185)}
+    table.table tr:nth-child(odd) {background: rgb(204, 200, 147)}
+  </style>
+</head>
+
+<body> 
+<h1>Days</h1>
+<p>period : {{start}} - {{end}}</p>
+<p>number of days : {{nb}}, threshold : {{nb}}</p>
+
+<table class="table">
+  <tr>
+    <td>{{ nb }} </td>
+    <td>{{ nb }} </td>
+  </tr>
+</table>
+</body>
+</html>
+
