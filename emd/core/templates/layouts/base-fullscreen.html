@@ -22,9 +22,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  
+
   <title>
-    Argon Dashboard Django - {% block title %} Open-Source Admin Panel {% endblock %} | Creative-Tim
+    Enron Mails Dashboard - {% block title %} Open-Source Admin Panel {% endblock %}
   </title>
 
   <!-- Favicon - loaded as static -->
@@ -43,22 +43,45 @@
 
 </head>
 
-<body class="">
-
-  {% include "includes/sidenav.html" %}
+<body class="bg-default">
 
   <div class="main-content">
 
-    {% include "includes/navigation.html" %}
+    {% include "includes/navigation-fullscreen.html" %}
 
+    <!-- Header -->
+    <div class="header bg-gradient-primary py-7 py-lg-8">
+      <div class="container">
+        <div class="header-body text-center mb-7">
+          <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-6">
+              <h1 class="text-white">
+                <a target="_blank" class="text-white"
+                   href="https://www.creative-tim.com/product/argon-dashboard-django">Enron Mails Dashboard</a>
+              </h1>
+              <p class="text-lead text-light">
+                UI-Ready open-source admin panel enhanced with database and authentication - 
+                Coded by <a target="_blank" class="text-white" href="https://www.creative-tim.com/">Creative-Tim</a> 
+                and <a target="_blank" class="text-white" href="https://appseed.us">AppSeed</a>.  
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="separator separator-bottom separator-skew zindex-100">
+        <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
+          <polygon class="fill-default" points="2560 0 2560 100 0 100"></polygon>
+        </svg>
+      </div>
+    </div>
+    
     {% block content %}{% endblock content %}
 
+    {% include "includes/footer-fullscreen.html" %}
+
   </div>
-
-  {% include "includes/scripts.html" %}
-
-  <!-- Specific JS goes HERE --> 
-  {% block javascripts %}{% endblock javascripts %}
+    
+  {% include "includes/scripts-fullscreen.html" %}
 
 </body>
 
