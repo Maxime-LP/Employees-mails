@@ -4,5 +4,8 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from django.contrib import admin
+from .models import mailbox,mail_address,mail
 
-# Register your models here.
+admin.site.register(mailbox)
+admin.site.register(mail_address)
+admin.site.register(mail)

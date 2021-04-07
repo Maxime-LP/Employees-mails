@@ -1,19 +1,20 @@
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mailsproject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timedelta, make_aware, timezone
-from mailsapp1.models import mailbox,mail_address,mail
+from app.models import mailbox, mail_address,mail
 import xml.etree.ElementTree as ET
 import re
 
 ##################################################
-path = r'C:\Users\lepau\OneDrive\Desktop'
+
+path = r'/home/amait/Documents/enron-mails/'
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-"""
+
 #xml file
-tree = ET.parse(path + '\employes_enron.xml')
+tree = ET.parse(path + 'employes_enron.xml')
 root = tree.getroot()
 
 for child in root:
@@ -42,7 +43,7 @@ for child in root:
             current_mailbox.tag = subchild.text
 
     current_mailbox.save()
-"""
+
 ##################################################
 
 ############################
@@ -62,7 +63,7 @@ def convert_date(input_date):
     return converted_date
 ############################
 
-
+'''
 data = path + r"\mailbox"
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
@@ -141,4 +142,4 @@ for folder,sub_folder,files in os.walk(data):
                 new_mail.previous_mail_id = None
                 new_mail.response_mail_id = None
                 new_mail.save()
-
+'''

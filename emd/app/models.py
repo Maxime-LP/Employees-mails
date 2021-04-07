@@ -3,8 +3,8 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+#from django.contrib.auth.models import User
 from django.db import models
-from django.contrib.auth.models import User
 
 class mailbox(models.Model):
     tag = models.CharField(max_length=40)
