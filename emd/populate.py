@@ -63,7 +63,7 @@ def convert_date(input_date):
     return converted_date
 ############################
 
-'''
+
 data = path + r"\mailbox"
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
@@ -142,4 +142,4 @@ for folder,sub_folder,files in os.walk(data):
                 new_mail.previous_mail_id = None
                 new_mail.response_mail_id = None
                 new_mail.save()
-'''
+
