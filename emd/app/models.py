@@ -24,7 +24,6 @@ class mail(models.Model):
     previous_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
     response_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
     #il peut y avoir plusieurs resp : une instance par rep
-
     #finalement on a une instance par couple sender/recipient
 
 
