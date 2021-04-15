@@ -18,7 +18,7 @@ class mail_address(models.Model):
 
 class mail(models.Model):
     mail_date = models.DateTimeField(null=True)
-    mailbox = models.ForeignKey(mailbox,on_delete=models.CASCADE)
+    mailbox = models.ForeignKey(mailbox,null=True,on_delete=models.CASCADE,related_name='+')
     recipient_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='recipient_mail_id') #NULL si le mail va à l'exterieur
     subject = models.CharField(max_length=60,null=True)
     #il peut y avoir plusieurs destinataires : une instance par destinataire 

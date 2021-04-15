@@ -3,19 +3,20 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timedelta, make_aware, timezone
-from app.models import mailbox, mail_address,mail
+from app.models import mailbox, mail_address, mail
 import xml.etree.ElementTree as ET
 import re
 
 ##################################################
 
 #path = r'/home/amait/Documents/enron-mails/'
-path = r'C:\Users\lepau\OneDrive'
+path = r'C:\Users\lepau\OneDrive\Desktop'
+"""
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-"""
+
 #xml file
-tree = ET.parse(path + 'employes_enron.xml')
+tree = ET.parse(path + '\employes_enron.xml')
 root = tree.getroot()
 
 for child in root:
@@ -54,20 +55,25 @@ def convert_date(input_date):
 
     if input_date[1] == ' ':            #ie if the day has only one digit
         input_date = '0'+input_date             #for string length consistency
-
     converted_date = datetime.strptime(input_date, '%d %b %Y %H:%M:%S %z')
-
     #converting the date in UTC format
     UTC = timezone(timedelta(hours = 0))
     converted_date = converted_date.astimezone(UTC)
-
     return converted_date
-############################
 
+def get_most_recent_mail(list_of_mails):
+    """
+    Input must be a list of mail instances or an instance of mail
+    """
+    if isinstance(list_of_mails,mail): return list_of_mails
+    return max(list_of_mails, key=lambda x: x.mail_date)
+
+############################
 
 data = path + r"\mailbox"
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
+
     for file in files:
         file_path = os.path.join(folder,file)
         print("\n fp : ",file_path)
@@ -83,24 +89,24 @@ for folder,sub_folder,files in os.walk(data):
             lines = iter(file.readlines())
             for line in lines:
                 if header:
+                    if line[:4]=="To: " or line[:4]=="Cc: " or line[:5]=="Bcc: ":
+                        recipients += re.split(', |,',line[4:-1])
+                        line = next(lines)
+
+                        while line[0]=="	":
+                            recipients += re.split(', |,',line[1:-1])
+                            line = next(lines)
+                        recipients = [rec for rec in recipients if rec!=""]
+                    
                     if line[:6]=='Date: ':
                         date = convert_date(line[11:-7])
 
                     elif line[:6]=='From: ':
-                        sender = line[6:].replace(" ","")
-
-                    elif line[:4]=="To: " or line[:4]=="Cc: " or line[:5]=="Bcc: ":
-                        recipients += re.split(', |,',line[4:-1])
-                        line = next(lines)
-                        while line[0]=="	":
-                            recipients += re.split(', |,',line[1:-1])
-                            line = next(lines)
-
-                        recipients = [rec for rec in recipients if rec!=""]
+                        sender = line[6:-1]
 
                     elif line[:9] == "Subject: ":
                         subject = line[9:]
-
+                        
                         if subject[:3] == "Re:":
                             response = True
 
@@ -118,9 +124,16 @@ for folder,sub_folder,files in os.walk(data):
             try:
                 sender_id = mail_address.objects.get(address=sender).id  #on récupère l'id du mail de l'envoyeur
             except django.core.exceptions.ObjectDoesNotExist:
-                sender_id = None                                        #sauf si le mail provient d'une adresse exterieure
-            
+                sender_id = None                                        #sauf si le mail provient d'une adresse exterieure 
+                                                                            #(ou d'un mail pas dans la db)
+
             for recipient in recipients:
+
+                try:
+                    recipient_id = mail_address.objects.get(address=recipient).id       #on récupère l'id du mail du destinataire
+                except django.core.exceptions.ObjectDoesNotExist:
+                    recipient_id = None                                                 #sauf si le mail va vers une adresse exterieure
+
                 try:
                     #on regarde s'il existe déjà un mail correspondant dans la db (si on l'a créé pour stocker une réponse par exemple)
                     current_mail = mail.objects.get(sender_mail = sender_id, recipient_mail = recipient_id, mail_date = date)
@@ -129,30 +142,27 @@ for folder,sub_folder,files in os.walk(data):
                 
                 current_mail.subject = subject
                 current_mail.mail_date = date
-                current_mail.mailbox = current_mailbox.id
-                
-                try:
-                    
-                    recipient_id = mail_address.objects.get(address=recipient).id       #on récupère l'id du mail du destinataire
-                except django.core.exceptions.ObjectDoesNotExist:
-                    recipient_id = None                                                 #sauf si le mail va vers une adresse exterieure
-
-                current_mail.recipient_mail = recipient_id
-                current_mail.sender_mail = sender_id
+                current_mail.mailbox_id = current_mailbox.id
+                current_mail.recipient_mail_id = recipient_id
+                current_mail.sender_mail_id = sender_id
                 current_mail.save()
-
 
                 ### traitement de la "chaîne" de mails ###
                 if response :
                     #on regarde si le mail precédent a déjà été créé
-                    try:
-                        previous_mail = mail.objects.filter(sender_mail = recipient_id,recipient_mail = sender_id, subject__endwith = subject[3:], mail_date__lt=date)
-                        current_mail.previous_mail = previous_mail.id
-                        previous_mail.next_mail = current_mail.id
-                    except django.core.exceptions.ObjectDoesNotExist:
+                    previous_mail = mail.objects.filter(sender_mail = recipient_id,recipient_mail = sender_id,
+                                                            subject__endswith = subject[3:], mail_date__lt=date)
+                    if len(previous_mail)==0:
                         #sinon on le crée
                         previous_mail = mail()
-                        previous_mail
+                        previous_mail.sender_mail_id = recipient_id
+                        previous_mail.recipient_mail_id = sender_id
+                        previous_mail.save()
+
+                    previous_mail = get_most_recent_mail(previous_mail)
+                    current_mail.previous_mail_id = previous_mail.id
+                    previous_mail.next_mail_id = current_mail.id
+                    previous_mail.save()
 
                 else:
                     current_mail.previous_mail = None
