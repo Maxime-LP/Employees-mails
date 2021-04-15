@@ -9,10 +9,11 @@ import re
 
 ##################################################
 
-path = r'/home/amait/Documents/enron-mails/'
+#path = r'/home/amait/Documents/enron-mails/'
+path = r'C:\Users\lepau\OneDrive'
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-
+"""
 #xml file
 tree = ET.parse(path + 'employes_enron.xml')
 root = tree.getroot()
@@ -43,7 +44,7 @@ for child in root:
             current_mailbox.tag = subchild.text
 
     current_mailbox.save()
-
+"""
 ##################################################
 
 ############################
@@ -76,8 +77,9 @@ for folder,sub_folder,files in os.walk(data):
             recipients = []
             header = True
             forwarded = False
+            response = False
 
-            #extraction des informations
+            ###### extraction des informations ######
             lines = iter(file.readlines())
             for line in lines:
                 if header:
@@ -87,7 +89,7 @@ for folder,sub_folder,files in os.walk(data):
                     elif line[:6]=='From: ':
                         sender = line[6:].replace(" ","")
 
-                    elif line[:4]=="To: " or line[:4]=="CC: " or line[:5]=="BCC: ":
+                    elif line[:4]=="To: " or line[:4]=="Cc: " or line[:5]=="Bcc: ":
                         recipients += re.split(', |,',line[4:-1])
                         line = next(lines)
                         while line[0]=="	":
@@ -96,50 +98,68 @@ for folder,sub_folder,files in os.walk(data):
 
                         recipients = [rec for rec in recipients if rec!=""]
 
-                    elif line[:12] == "Subject: Re:":
-                        pass
+                    elif line[:9] == "Subject: ":
+                        subject = line[9:]
 
-                    elif line[:13] == "Subject: Fwd:":
-                        forwarded = True
+                        if subject[:3] == "Re:":
+                            response = True
+
+                        elif line[:4] == "Fwd:":
+                            forwarded = True
 
                     elif line[:7] == "X-From:":
                         header = False
 
-                
-                """
-                else:
-                    if bool(re.match(r"-+ Forwarded by ",line)):
-                        forwarded = True
 
-                    elif forwaded and bool(re.match(r".+<.+@.+>.+",line)):
-                        previous_sender = re.search(r"<.+@.+>",line).group()[1:-1]
-                        previous_date = re.search(r" on .*",line).group()[4:]
-                """
-
-            #injection dans la db
+            ###### injection dans la db ######
             mailbox_tag = re.search(r"\w+-\w",folder).group()
             current_mailbox = mailbox.objects.get(tag=mailbox_tag)
 
             try:
-                sender_id = mail_address.objects.get(address=sender).id
+                sender_id = mail_address.objects.get(address=sender).id  #on récupère l'id du mail de l'envoyeur
             except django.core.exceptions.ObjectDoesNotExist:
-                #le mail provient d'une adresse exterieure
-                sender_id = None
+                sender_id = None                                        #sauf si le mail provient d'une adresse exterieure
             
             for recipient in recipients:
-                new_mail = mail()
-                new_mail.mail_date = date
+                try:
+                    #on regarde s'il existe déjà un mail correspondant dans la db (si on l'a créé pour stocker une réponse par exemple)
+                    current_mail = mail.objects.get(sender_mail = sender_id, recipient_mail = recipient_id, mail_date = date)
+                except django.core.exceptions.ObjectDoesNotExist:
+                    current_mail = mail()
+                
+                current_mail.subject = subject
+                current_mail.mail_date = date
+                current_mail.mailbox = current_mailbox.id
                 
                 try:
-                    recipient_id = mail_address.objects.get(address=recipient).id
+                    
+                    recipient_id = mail_address.objects.get(address=recipient).id       #on récupère l'id du mail du destinataire
                 except django.core.exceptions.ObjectDoesNotExist:
-                    #le mail va vers une adresse exterieure
-                    recipient_id = None
+                    recipient_id = None                                                 #sauf si le mail va vers une adresse exterieure
 
-                new_mail.recipient_mail_id = recipient_id
-                new_mail.sender_mail_id = sender_id
+                current_mail.recipient_mail = recipient_id
+                current_mail.sender_mail = sender_id
+                current_mail.save()
 
-                new_mail.previous_mail_id = None
-                new_mail.response_mail_id = None
-                new_mail.save()
+
+                ### traitement de la "chaîne" de mails ###
+                if response :
+                    #on regarde si le mail precédent a déjà été créé
+                    try:
+                        previous_mail = mail.objects.filter(sender_mail = recipient_id,recipient_mail = sender_id, subject__endwith = subject[3:], mail_date__lt=date)
+                        current_mail.previous_mail = previous_mail.id
+                        previous_mail.next_mail = current_mail.id
+                    except django.core.exceptions.ObjectDoesNotExist:
+                        #sinon on le crée
+                        previous_mail = mail()
+                        previous_mail
+
+                else:
+                    current_mail.previous_mail = None
+
+                current_mail.save()
+            
+            ### fin de l'injection des informations
+        ### fin de la lecture du mail
+                
 
