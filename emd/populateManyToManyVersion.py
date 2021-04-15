@@ -127,50 +127,30 @@ for folder,sub_folder,files in os.walk(data):
                 sender_id = None                                        #sauf si le mail provient d'une adresse exterieure 
                                                                             #(ou d'un mail pas dans la db)
 
-            for recipient in recipients:
 
-                try:
-                    recipient_id = mail_address.objects.get(address=recipient).id       #on récupère l'id du mail du destinataire
-                except django.core.exceptions.ObjectDoesNotExist:
-                    recipient_id = None                                                 #sauf si le mail va vers une adresse exterieure
+            try:
+                #on regarde s'il existe déjà un mail correspondant dans la db (si on l'a créé pour stocker une réponse par exemple)
+                current_mail = mail.objects.filter(sender_mail = sender_id, subject__endswith = subject[3:])
+                for recipient in recipients:
+                    try:
+                        recipient_id = mail_address.objects.get(address=recipient).id       #on récupère l'id du mail du destinataire
+                        current_mail = current_mail.filter(recipients_mails__id__contains = recipient_id)
+                    except django.core.exceptions.ObjectDoesNotExist:
+                        recipient_id = None
+               
 
-                try:
-                    #on regarde s'il existe déjà un mail correspondant dans la db (si on l'a créé pour stocker une réponse par exemple)
-                    current_mail = mail.objects.get(sender_mail_id = sender_id, recipient_mail_id = recipient_id, mail_date = date)
-                except django.core.exceptions.ObjectDoesNotExist:
-                    current_mail = mail()
-                
-                current_mail.subject = subject
+            except django.core.exceptions.ObjectDoesNotExist:
+                current_mail = mail()
+                current_mail.recipients_mails.add(recipients)
+                current_mail.sender_id = sender_id
                 current_mail.mail_date = date
-                current_mail.mailbox_id = current_mailbox.id
-                current_mail.recipient_mail_id = recipient_id
-                current_mail.sender_mail_id = sender_id
-                current_mail.save()
 
-                ### traitement de la "chaîne" de mails ###
-                if response :
-                    #on regarde si le mail précédent a déjà été créé
-                    previous_mail = mail.objects.filter(sender_mail = recipient_id,recipient_mail = sender_id,
-                                                            subject__endswith = subject[4:], mail_date__lt=date)  #Retourne un QuerySet i.e un ensemble d'instances de mail
-                    
-                    if not isinstance(previous_mail,mail) :
-                        if len(previous_mail)==0:  #si le QuerySet est vide, on crée le mail
-                            previous_mail = mail()
-                            previous_mail.sender_mail_id = recipient_id
-                            previous_mail.recipient_mail_id = sender_id
-                            previous_mail.mailbox_id = current_mailbox.id
-                            previous_mail.save()
-                        else:
-                            previous_mail = get_most_recent_mail(previous_mail)
-                    
-                    current_mail.previous_mail_id = previous_mail.id
-                    previous_mail.next_mail_id = current_mail.id
-                    previous_mail.save()
+        
 
-                else:
-                    current_mail.previous_mail = None
 
-                current_mail.save()
+            
+
+
             
             ### fin de l'injection des informations
         ### fin de la lecture du mail

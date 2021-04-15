@@ -21,11 +21,7 @@ class mail(models.Model):
     mailbox = models.ForeignKey(mailbox,null=True,on_delete=models.CASCADE,related_name='+')
     recipient_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='recipient_mail_id') #NULL si le mail va à l'exterieur
     subject = models.CharField(max_length=60,null=True)
-    #il peut y avoir plusieurs destinataires : une instance par destinataire 
     sender_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='sender_mail_id') #NULL si le mail provient de l'exterieur
     previous_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
     next_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
-    #il peut y avoir plusieurs resp : une instance par resp
-    #finalement on a une instance par couple sender/recipient
-
 
