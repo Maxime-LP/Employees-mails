@@ -36,19 +36,18 @@ class user(models.Model):
 
 class mailbox(models.Model):
     tag = models.CharField(max_length=40)
-    user = models.ForeignKey(user,null=True,on_delete=models.CASCADE)
 
 class mail_address(models.Model):
     box = models.ForeignKey(mailbox,null=True, on_delete=models.CASCADE)
     address = models.EmailField(max_length=80)
-    user = models.ForeignKey(user,null=True,on_delete=models.CASCADE) #?
+    user = models.ForeignKey(user,null=True,on_delete=models.CASCADE)
 
 class mail(models.Model):
     mailbox = models.ForeignKey(mailbox,null=True,on_delete=models.CASCADE,related_name='+')
     mail_date = models.DateTimeField(null=True)
     subject = models.CharField(max_length=60,null=True)
 
-    sender = models.ForeignKey(user,null=True,on_delete=models.CASCADE,related_name='sender_id')
-    recipient = models.ForeignKey(user,null=True,on_delete=models.CASCADE,related_name='recipient_id')
+    sender_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='sender_mail_id')
+    recipient_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='recipient_mail_id')
     
     response = models.BooleanField(null=True)

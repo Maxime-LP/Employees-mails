@@ -24,7 +24,6 @@ for child in root:
     current_user = user()
     current_user.inEnron = True
     current_user.save()
-    current_mailbox.user_id = current_user.id
     current_mailbox.save()
     
     last_name = ''
@@ -142,24 +141,23 @@ for folder,sub_folder,files in os.walk(data):
                     elif line[:9] == "X-Folder:":
                         header = False
 
-            print(sender_mail, recipients)
             ###### injection dans la db ######
             mailbox_tag = re.search(r"\w+-\w",folder).group()
             current_mailbox = mailbox.objects.get(tag=mailbox_tag)
 
             try:
                 sender_mail = mail_address.objects.get(address=sender_mail)  #on récupère l'id de l'envoyeur
-                sender_box = mailbox.objects.get(pk=sender_mail.box_id)
-                sender = user.objects.get(pk=sender_box.user_id)
+                sender = user.objects.get(pk=sender_mail.user_id)
             except django.core.exceptions.ObjectDoesNotExist:                #s'il n'existe pas dans la db, on le crée
                 sender = user(inEnron = False, name = sender_name)
                 sender.save()
+                sender_mail = mail_address(address = sender_mail, user_id = sender.id)
+                sender_mail.save()
 
             for recipient in recipients:
                 try:
                     recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur
-                    recipient_box = mailbox.objects.get(pk=recipient_mail.box_id)  
-                    recipient = user.objects.get(pk=recipient_box.user_id)
+                    recipient = user.objects.get(pk=recipient_mail.user_id)
                 except django.core.exceptions.ObjectDoesNotExist:        #s'il n'y est pas, on regarde d'abord si sender travaille chez Enron
                     if sender.inEnron :
                         recipient = user(inEnron = False)
@@ -175,8 +173,8 @@ for folder,sub_folder,files in os.walk(data):
                         mailbox_id = current_mailbox.id,
                         mail_date = date,
                         subject = subject,
-                        sender_id = sender.id,
-                        recipient_id = recipient.id,
+                        sender_mail_id = sender_mail.id,
+                        recipient_mail_id = recipient_mail.id,
                         response = response
                     )
 
