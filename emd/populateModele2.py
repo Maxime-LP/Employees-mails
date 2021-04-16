@@ -3,7 +3,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timedelta, make_aware, timezone
-from app.models import mailbox, mail_address, mail
+from app.models import mailbox, mail_address, mail, user
 import xml.etree.ElementTree as ET
 import re
 
@@ -11,29 +11,33 @@ import re
 
 #path = r'/home/amait/Documents/enron-mails/'
 path = r'C:\Users\lepau\OneDrive\Desktop'
-"""
+
 ###Populate mailbox and mail_address databases
 #uncomment to populate
 
 #xml file
 tree = ET.parse(path + '\employes_enron.xml')
 root = tree.getroot()
-
+"""
 for child in root:
     current_mailbox = mailbox()
+    current_user = user()
+    current_user.inEnron = True
+    current_user.save()
+    current_mailbox.user_id = current_user.id
     current_mailbox.save()
 
     try:
-        current_mailbox.category = child.attrib['category']
+        current_user.category = child.attrib['category']
     except KeyError:
-        current_mailbox.category = 'Employee'
+        current_user.category = 'Employee'
 
     for subchild in child:
         if subchild.tag == 'lastname':
-            current_mailbox.last_name = subchild.text
+            current_user.last_name = subchild.text
 
         elif subchild.tag == 'firstname':
-            current_mailbox.first_name = subchild.text
+            current_user.first_name = subchild.text
 
         elif subchild.tag == 'email':
             new_mail = mail_address()
@@ -45,6 +49,7 @@ for child in root:
             current_mailbox.tag = subchild.text
 
     current_mailbox.save()
+    current_user.save()
 """
 ##################################################
 
@@ -82,27 +87,34 @@ for folder,sub_folder,files in os.walk(data):
         with open(file_path,'r') as file:
             recipients = []
             header = True
-            forwarded = False
             response = False
 
             ###### extraction des informations ######
             lines = iter(file.readlines())
             for line in lines:
                 if header:
-                    if line[:4]=="To: " or line[:4]=="Cc: " or line[:5]=="Bcc: ":
-                        recipients += re.split(', |,',line[4:-1])
-                        line = next(lines)
 
-                        while line[0]=="	":
-                            recipients += re.split(', |,',line[1:-1])
-                            line = next(lines)
-                        recipients = [rec for rec in recipients if rec!=""]
-                    
-                    if line[:6]=='Date: ':
+                    if line[:8]=="X-From: ":
+                        line = line[8:]
+                        print(line)
+                        if bool(re.match(r'^".+" <.+@.+>.*$', line)):
+                            user_first_name = re.match(r'^"\w+[ ]',line).group()
+                            user_last_name = re.match(r'[ ]\w+"',line).group()
+                            user_mail = re.match(r'<.+@.+>.*$',line).group()
+                            print(user_first_name,user_last_name,user_mail)
+
+                        elif bool(re.match(r'.+@.+$', line)):
+                            user_mail = line
+                            print(user_mail)
+
+                    elif line[:6]=="X-To: " or line[:6]=="X-cc: " :
+                        recipients += re.split(', ',line[6:])
+
+                    elif line[:7]=="X-bcc: ":
+                        recipients += re.split(', ',line[7:])
+
+                    elif line[:6]=='Date: ':
                         date = convert_date(line[11:-7])
-
-                    elif line[:6]=='From: ':
-                        sender = line[6:-1]
 
                     elif line[:9] == "Subject: ":
                         subject = line[9:]
@@ -110,12 +122,8 @@ for folder,sub_folder,files in os.walk(data):
                         if subject[:3] == "Re:":
                             response = True
 
-                        elif line[:4] == "Fwd:":
-                            forwarded = True
-
-                    elif line[:7] == "X-From:":
+                    elif line[:9] == "X-Folder:":
                         header = False
-
 
             #QUESTIONS : 
             # Accorde-t-on la même importance à des mails envoyés à 1,2,3,.. personnes ?
@@ -124,7 +132,7 @@ for folder,sub_folder,files in os.walk(data):
             #
 
 
-
+            """
             ###### injection dans la db ######
             mailbox_tag = re.search(r"\w+-\w",folder).group()
             current_mailbox = mailbox.objects.get(tag=mailbox_tag)
@@ -182,7 +190,7 @@ for folder,sub_folder,files in os.walk(data):
                     current_mail.previous_mail = None
 
                     current_mail.save()
-
+            """
             ### fin de l'injection des informations
         ### fin de la lecture du mail
                 
