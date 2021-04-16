@@ -31,17 +31,17 @@ class mail(models.Model):
 #modèle 2
 class user(models.Model):
     inEnron = models.BooleanField(null=False)
-    last_name = models.CharField(null=True,max_length=40)
-    first_name = models.CharField(null=True,max_length=40)
-    category = models.CharField(null=True,max_length=40,default='Employee')
+    name = models.CharField(null=True,max_length=80)
+    category = models.CharField(null=True,max_length=40)
 
 class mailbox(models.Model):
     tag = models.CharField(max_length=40)
     user = models.ForeignKey(user,null=True,on_delete=models.CASCADE)
 
 class mail_address(models.Model):
-    box = models.ForeignKey(mailbox, on_delete=models.CASCADE)
+    box = models.ForeignKey(mailbox,null=True, on_delete=models.CASCADE)
     address = models.EmailField(max_length=80)
+    user = models.ForeignKey(user,null=True,on_delete=models.CASCADE) #?
 
 class mail(models.Model):
     mailbox = models.ForeignKey(mailbox,null=True,on_delete=models.CASCADE,related_name='+')
@@ -50,6 +50,5 @@ class mail(models.Model):
 
     sender = models.ForeignKey(user,null=True,on_delete=models.CASCADE,related_name='sender_id')
     recipient = models.ForeignKey(user,null=True,on_delete=models.CASCADE,related_name='recipient_id')
-
-    previous_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
-    next_mail = models.ForeignKey("self",null=True,on_delete=models.SET_NULL,related_name='+')
+    
+    response = models.BooleanField(null=True)
