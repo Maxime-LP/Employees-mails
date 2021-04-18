@@ -161,11 +161,13 @@ for folder,sub_folder,files in os.walk(data):
                     current_mailbox = mailbox.objects.get(tag=tag)
                 except django.core.exceptions.ObjectDoesNotExist:
                     pass
-
+            
+            #### Recupération des instances correspondant au profil utilisateur et au mail de l'envoyeur ####
             try:
-                sender_mail = mail_address.objects.get(address=sender_mail)  #on récupère l'id de l'envoyeur
-            except django.core.exceptions.ObjectDoesNotExist:                #s'il n'existe pas dans la db, on le crée
-                if sender_name != None: 
+                sender_mail = mail_address.objects.get(address=sender_mail)  #on récupère le mail de l'envoyeur
+            except django.core.exceptions.ObjectDoesNotExist:                   #s'il n'existe pas dans la db, on le crée
+
+                if sender_name is not None: 
                     try:
                         sender = user.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
@@ -188,9 +190,10 @@ for folder,sub_folder,files in os.walk(data):
                 sender_mail.save()
 
             try:
-                sender = user.objects.get(pk=sender_mail.user_id)
-            except django.core.exceptions.ObjectDoesNotExist:
-                if sender_name != None: 
+                sender = user.objects.get(pk=sender_mail.user_id)   #on récupère le profil de l'envoyeur
+            except django.core.exceptions.ObjectDoesNotExist:             #s'il n'existe pas dans la db, on le crée
+
+                if sender_name is not None: 
                     try:
                         sender = user.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
@@ -213,6 +216,8 @@ for folder,sub_folder,files in os.walk(data):
                 sender_mail.save()
 
 
+
+            #### Parcours de la liste des destinataires ####
             for index,recipient in enumerate(recipients):
                 
                 try:
