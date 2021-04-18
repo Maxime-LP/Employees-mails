@@ -18,7 +18,7 @@ path = os.getcwd()
 #uncomment to populate
 
 #xml file
-tree = ET.parse(path + 'employes_enron.xml')
+tree = ET.parse(path + '/employes_enron.xml')
 root = tree.getroot()
 
 for child in root:
@@ -80,7 +80,8 @@ def get_most_recent_mail(list_of_mails):
     return max(list_of_mails, key=lambda x: x.mail_date)
 
 ############################
-data =  "/home/amait/Downloads" # path + r"/employes_enron"
+'''
+data =  "/home/amait/Downloads/maildir" # path + r"/employes_enron"
 print(data)
 #data = path + r"\mailbox"
 #Populate mail database
@@ -201,3 +202,4 @@ for folder,sub_folder,files in os.walk(data):
 
             ### fin de l'injection des informations
         ### fin de la lecture du mail
+'''
