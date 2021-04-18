@@ -172,20 +172,15 @@ for folder,sub_folder,files in os.walk(data):
                         sender = user.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
                         sender = user(name = sender_name)
-                        if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
-                            sender.inEnron = True
-                        else:
-                            sender.inEnron = False
-                        sender.save()
-
                 else: 
                     sender = user(name = sender_name)
-                    if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
-                        sender.inEnron = True
-                    else:
-                        sender.inEnron = False
-                    sender.save()
 
+                if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
+                    sender.inEnron = True
+                else:
+                    sender.inEnron = False
+
+                sender.save()
                 sender_mail = mail_address(address = sender_mail, user_id = sender.id)
                 sender_mail.save()
 
@@ -198,23 +193,15 @@ for folder,sub_folder,files in os.walk(data):
                         sender = user.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
                         sender = user(name = sender_name)
-                        if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
-                            sender.inEnron = True
-                        else:
-                            sender.inEnron = False
-                        sender.save()
-
                 else: 
                     sender = user(name = sender_name)
-                    if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
-                        sender.inEnron = True
-                    else:
-                        sender.inEnron = False
-                    sender.save()
-
-                sender_mail = mail_address.user_id = sender.id
-                sender_mail.save()
-
+                
+                if bool(re.match(r'^.+@.*enron.com$',sender_mail.address)):
+                    sender.inEnron = True
+                else:
+                    sender.inEnron = False
+                
+                sender.save()
 
 
             #### Parcours de la liste des destinataires ####
