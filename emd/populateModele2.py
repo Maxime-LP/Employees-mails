@@ -120,7 +120,7 @@ for folder,sub_folder,files in os.walk(data):
                             sender_last_name = ''
                             sender_mail = line[:-1]
                         
-                        sender_name = f"{sender_first_name} {sender_last_name}"
+                        sender_name = sender_first_name + " "*(sender_first_name!='') + sender_last_name
                     
                     elif line[:6]=="X-To: "  and len(line) > 7:
                         if line [6:30]!='undisclosed-recipients:,':
@@ -151,6 +151,7 @@ for folder,sub_folder,files in os.walk(data):
             try:
                 sender_mail = mail_address.objects.get(address=sender_mail)  #on récupère l'id de l'envoyeur
                 sender = user.objects.get(pk=sender_mail.user_id)
+
             except django.core.exceptions.ObjectDoesNotExist:                #s'il n'existe pas dans la db, on le crée
                 sender = user(inEnron = False, name = sender_name)
                 sender.save()
@@ -161,14 +162,28 @@ for folder,sub_folder,files in os.walk(data):
                 try:
                     recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur
                     recipient = user.objects.get(pk=recipient_mail.user_id)
-                except django.core.exceptions.ObjectDoesNotExist:        #s'il n'y est pas, on regarde d'abord si sender travaille chez Enron
-                    if sender.inEnron :
+                    
+                except django.core.exceptions.ObjectDoesNotExist:
+                    #si le destinataire utilise une adresse enron on lui crée un profil utilisateur sans information d'identité   
+                    if bool(re.match(r'^.+@.*enron.com$',recipient)):
+                        print('ok',recipient)
+                        recipient_mail = recipient
+                        recipient = user(inEnron = True)
+                        recipient.save()
+                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail.save()
+                    
+                    #sinon le destinataire est exterieur à enron et on regarde si l'envoyeur est chez enron
+                    elif sender.inEnron :
+                        recipient_mail = recipient
                         recipient = user(inEnron = False)
                         recipient.save()
-                        recipient_mail = mail(address = recipient, user = recipient.id)
+                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
-                    else:                                           #si sender n'est pas d'Enron et que le destinataire ne l'est pas non plus, 
-                        recipient = None                            #on n'a pas de raison de garder une trace de cette communication
+                    
+                    #si sender n'est pas d'Enron et que le destinataire ne l'est pas non plus
+                    else:                #on n'a pas de raison de garder une trace de cette communication
+                        recipient = None                            
                 
                 
                 if recipient is not None:
