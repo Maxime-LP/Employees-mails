@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
@@ -9,14 +10,15 @@ import re
 
 ##################################################
 
+path = os.getcwd()
 #path = r'/home/amait/Documents/enron-mails/'
-path = r'C:\Users\lepau\OneDrive\Desktop'
+#path = r'C:\Users\lepau\OneDrive\Desktop'
 
 ###Populate mailbox and mail_address databases
 #uncomment to populate
 
 #xml file
-tree = ET.parse(path + '\employes_enron.xml')
+tree = ET.parse(path + 'employes_enron.xml')
 root = tree.getroot()
 
 for child in root:
@@ -78,8 +80,9 @@ def get_most_recent_mail(list_of_mails):
     return max(list_of_mails, key=lambda x: x.mail_date)
 
 ############################
-
-data = path + r"\mailbox"
+data =  "/home/amait/Downloads" # path + r"/employes_enron"
+print(data)
+#data = path + r"\mailbox"
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
 
