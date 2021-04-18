@@ -102,8 +102,17 @@ for folder,sub_folder,files in os.walk(data):
             lines = iter(file.readlines())
             for line in lines:
                 if header:
-                    if line[:4]=="To: " or line[:4]=="Cc: " or line[:5]=="Bcc: ":
+                    if (line[:4]=="To: " or line[:4]=="Cc: ") and len(line) > 4:
                         recipients += re.split(', |,',line[4:-1])
+                        line = next(lines)
+
+                        while line[0]=="	":
+                            recipients += re.split(', |,',line[1:-1])
+                            line = next(lines)
+                        recipients = [rec for rec in recipients if rec!=""]
+                    
+                    if line[:5]=="Bcc: " and len(line) > 5:
+                        recipients += re.split(', |,',line[5:-1])
                         line = next(lines)
 
                         while line[0]=="	":
@@ -114,7 +123,7 @@ for folder,sub_folder,files in os.walk(data):
                     if line[:6]=='From: ':
                         sender_mail = line[6:-1]
 
-                    if line[:6]=='Date: ':
+                    elif line[:6]=='Date: ':
                         date = convert_date(line[11:-7])
 
                     elif line[:9] == "Subject: ":
