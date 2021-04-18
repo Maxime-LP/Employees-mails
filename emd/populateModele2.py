@@ -14,7 +14,7 @@ path = r'C:\Users\lepau\OneDrive\Desktop'
 
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-"""
+
 #xml file
 tree = ET.parse(path + '\employes_enron.xml')
 root = tree.getroot()
@@ -54,7 +54,7 @@ for child in root:
     current_user.name = f"{first_name} {last_name}"
     current_mailbox.save()
     current_user.save()
-"""
+
 ##################################################
 
 ############################
