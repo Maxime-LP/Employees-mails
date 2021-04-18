@@ -1,50 +1,61 @@
+#!/usr/bin/env python3
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timedelta, make_aware, timezone
-from app.models import mailbox, mail_address, mail
+from app.models import mailbox, mail_address, mail, user
 import xml.etree.ElementTree as ET
 import re
 
 ##################################################
 
+#path = os.getcwd()
 #path = r'/home/amait/Documents/enron-mails/'
 path = r'C:\Users\lepau\OneDrive\Desktop'
-"""
+
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-
+"""
 #xml file
-tree = ET.parse(path + '\employes_enron.xml')
+tree = ET.parse(path + '/employes_enron.xml')
 root = tree.getroot()
 
 for child in root:
     current_mailbox = mailbox()
+    current_user = user()
+    current_user.inEnron = True
+    current_user.save()
     current_mailbox.save()
+    
+    last_name = ''
+    first_name = ''
 
     try:
-        current_mailbox.category = child.attrib['category']
+        current_user.category = child.attrib['category']
     except KeyError:
-        current_mailbox.category = 'Employee'
+        current_user.category = 'Employee'
 
     for subchild in child:
         if subchild.tag == 'lastname':
-            current_mailbox.last_name = subchild.text
+            last_name = subchild.text
 
         elif subchild.tag == 'firstname':
-            current_mailbox.first_name = subchild.text
+            first_name = subchild.text
 
         elif subchild.tag == 'email':
             new_mail = mail_address()
             new_mail.box_id = current_mailbox.id
             new_mail.address = subchild.attrib['address']
+            new_mail.user_id = current_user.id
             new_mail.save()
         
         elif subchild.tag == 'mailbox':
             current_mailbox.tag = subchild.text
-
+    
+    current_user.name = f"{first_name} {last_name}"
     current_mailbox.save()
+    current_user.save()
 """
 ##################################################
 
@@ -70,7 +81,9 @@ def get_most_recent_mail(list_of_mails):
 
 ############################
 
+#data =  "/home/amait/Downloads/maildir"
 data = path + r"\mailbox"
+
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
 
@@ -81,8 +94,8 @@ for folder,sub_folder,files in os.walk(data):
         #lecture d'un mail
         with open(file_path,'r') as file:
             recipients = []
+            recipients_names = []
             header = True
-            forwarded = False
             response = False
 
             ###### extraction des informations ######
@@ -98,11 +111,11 @@ for folder,sub_folder,files in os.walk(data):
                             line = next(lines)
                         recipients = [rec for rec in recipients if rec!=""]
                     
+                    if line[:6]=='From: ':
+                        sender_mail = line[6:-1]
+
                     if line[:6]=='Date: ':
                         date = convert_date(line[11:-7])
-
-                    elif line[:6]=='From: ':
-                        sender = line[6:-1]
 
                     elif line[:9] == "Subject: ":
                         subject = line[9:]
@@ -110,80 +123,139 @@ for folder,sub_folder,files in os.walk(data):
                         if subject[:3] == "Re:":
                             response = True
 
-                        elif line[:4] == "Fwd:":
-                            forwarded = True
+                    elif line[:8]=="X-From: ":
+                        line = line[8:]
 
-                    elif line[:7] == "X-From:":
+                        if bool(re.match(r'^".+" <.+@.+>.*$', line)):
+                            infos = re.split('"',line)
+                            #['',name,mail]
+                            sender_name = infos[1]
+
+                        elif bool(re.match(r'.+@.+$', line)):
+                            sender_name = None
+                        
+                        elif bool(re.match(r'^X-From: [^@.]+$',line)):
+                            sender_name = line[8:-1]
+                        
+
+                    elif line[:6]=="X-To: " and len(line)>6:
+                        if not bool("^X-To: undisclosed-recipients:, *$"):
+                            if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+( )*$", line) ):
+                                recipients_names += re.split(', ',line[6:-1])
+
+                    elif line[:6]=="X-cc: " and len(line) > 6:
+                        if bool( re.match(r"^X-cc: ([^@\.\t\n]+,?)+ *$", line) ):
+                                recipients_names += re.split(', ',line[6:-1])
+
+                    elif line[:7]=="X-bcc: ":
                         header = False
-
-
-            #QUESTIONS : 
-            # Accorde-t-on la même importance à des mails envoyés à 1,2,3,.. personnes ?
-            #
-            #
-            #
-
-
-
+                        if len(line) > 7:
+                            if bool( re.match(r"^X-bcc: ([^@\.\t\n]+,?)+ *$", line) ):
+                                recipients_names += re.split(', ',line[6:-1])
+            
             ###### injection dans la db ######
-            mailbox_tag = re.search(r"\w+-\w",folder).group()
-            current_mailbox = mailbox.objects.get(tag=mailbox_tag)
+            mailbox_tag = re.findall(r"\w+-\w",folder)
+            #pour eviter les bugs avec des noms de dossier correspondant au pattern
+            for tag in mailbox_tag:
+                try:
+                    current_mailbox = mailbox.objects.get(tag=tag)
+                except django.core.exceptions.ObjectDoesNotExist:
+                    pass
 
             try:
-                sender_id = mail_address.objects.get(address=sender).id  #on récupère l'id du mail de l'envoyeur
-            except django.core.exceptions.ObjectDoesNotExist:
-                sender_id = None                                        #sauf si le mail provient d'une adresse exterieure 
-                                                                            #(ou d'une adresse pas dans la db)
-
-            for recipient in recipients:
-
-                try:
-                    recipient_id = mail_address.objects.get(address=recipient).id       #on récupère l'id du mail du destinataire
-                except django.core.exceptions.ObjectDoesNotExist:
-                    recipient_id = None                                                 #sauf si le mail va vers une adresse exterieure
-
-                #si le destinataire n'est pas dans la db, on ne veut pas perdre de l'information en confondant le même mail envoyé à plusieurs id None
-                if recipient_id != None:
+                sender_mail = mail_address.objects.get(address=sender_mail)  #on récupère l'id de l'envoyeur
+            except django.core.exceptions.ObjectDoesNotExist:                #s'il n'existe pas dans la db, on le crée
+                if sender_name != None: 
                     try:
-                        #on regarde s'il existe déjà un mail correspondant dans la db (si on l'a créé pour stocker une réponse par exemple)
-                        current_mail = mail.objects.get(sender_mail_id = sender_id, recipient_mail_id = recipient_id, mail_date = date)
+                        sender = user.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
-                        current_mail = mail()
-                else:
-                    current_mail = mail()
-                
-                current_mail.subject = subject
-                current_mail.mail_date = date
-                current_mail.mailbox_id = current_mailbox.id
-                current_mail.recipient_mail_id = recipient_id
-                current_mail.sender_mail_id = sender_id
-                current_mail.save()
+                        sender = user(name = sender_name)
+                        if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
+                            sender.inEnron = True
+                        else:
+                            sender.inEnron = False
+                        sender.save()
 
-                ### traitement de la "chaîne" de mails ###
-                if response :
-                    #on regarde si le mail précédent a déjà été créé
-                    previous_mail = mail.objects.filter(sender_mail = recipient_id,recipient_mail = sender_id,
-                                                            subject__endswith = subject[4:], mail_date__lt=date)  #Retourne un QuerySet d'instances de mail
-                        
-
-                    if len(previous_mail)==0:  #si le QuerySet est vide, on crée le mail
-                        previous_mail = mail()
-                        previous_mail.sender_mail_id = recipient_id
-                        previous_mail.recipient_mail_id = sender_id
-                        previous_mail.save()
+                else: 
+                    sender = user(name = sender_name)
+                    if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
+                        sender.inEnron = True
                     else:
-                        previous_mail = get_most_recent_mail(previous_mail)
-                        
-                    current_mail.previous_mail_id = previous_mail.id
-                    previous_mail.next_mail_id = current_mail.id
-                    previous_mail.save()
-                
-                else:
-                    current_mail.previous_mail = None
+                        sender.inEnron = False
+                    sender.save()
 
+                sender_mail = mail_address(address = sender_mail, user_id = sender.id)
+                sender_mail.save()
+
+            try:
+                sender = user.objects.get(pk=sender_mail.user_id)
+            except django.core.exceptions.ObjectDoesNotExist:
+                if sender_name != None: 
+                    try:
+                        sender = user.objects.get(name=sender_name)
+                    except django.core.exceptions.ObjectDoesNotExist:
+                        sender = user(name = sender_name)
+                        if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
+                            sender.inEnron = True
+                        else:
+                            sender.inEnron = False
+                        sender.save()
+
+                else: 
+                    sender = user(name = sender_name)
+                    if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
+                        sender.inEnron = True
+                    else:
+                        sender.inEnron = False
+                    sender.save()
+
+                sender_mail = mail_address.user_id = sender.id
+                sender_mail.save()
+
+
+            for index,recipient in enumerate(recipients):
+                
+                try:
+                    recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur
+                    recipient = user.objects.get(pk=recipient_mail.user_id)
+                    
+                except django.core.exceptions.ObjectDoesNotExist:
+                    #si le destinataire utilise une adresse enron on lui crée un enregistrement
+                    if bool(re.match(r'^.+@.*enron.com$',recipient)):
+                        recipient_mail = recipient
+                        recipient = user(inEnron = True)
+                        recipient.save()
+                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail.save()
+                    
+                    #sinon le destinataire est exterieur à enron et on regarde si l'envoyeur est chez enron
+                    elif sender.inEnron :
+                        recipient_mail = recipient
+                        recipient = user(inEnron = False)
+                        recipient.save()
+                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail.save()
+                    
+                    #si sender n'est pas d'Enron et que le destinataire ne l'est pas non plus
+                    else:                #on n'a pas de raison de garder une trace de cette communication
+                        recipient = None                            
+                
+                if recipient is not None:
+                    current_mail = mail(
+                        mailbox_id = current_mailbox.id,
+                        mail_date = date,
+                        subject = subject,
+                        sender_mail_id = sender_mail.id,
+                        recipient_mail_id = recipient_mail.id,
+                        response = response
+                    )
+                    if recipients_names!=[]:
+                        recipient.name = recipients_names[index]
+                    
+                    recipient.save()
                     current_mail.save()
 
+            
             ### fin de l'injection des informations
         ### fin de la lecture du mail
-                
 

@@ -36,7 +36,7 @@ class user(models.Model):
 
 class mailbox(models.Model):
     tag = models.CharField(max_length=40)
-    #user = models.ForeignKey(user,null=True,on_delete=models.CASCADE) 
+    #user = models.ForeignKey(user,null=True,on_delete=models.CASCADE)
 
 class mail_address(models.Model):
     box = models.ForeignKey(mailbox,null=True, on_delete=models.CASCADE)
