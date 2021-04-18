@@ -151,16 +151,35 @@ for folder,sub_folder,files in os.walk(data):
                         if not bool("^X-To: undisclosed-recipients:, *$"):
                             if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+( )*$", line) ):
                                 recipients_names += re.split(', ',line[6:-1])
+                                line = next(lines)
 
-                    elif line[:6]=="X-cc: " and len(line) > 6:
+                                while line[0]=="	":
+                                    recipients_names += re.split(', |,',line[1:-1])
+                                    line = next(lines)
+                                recipients_names = [rec for rec in recipients_names if rec!=""]
+
+                    if line[:6]=="X-cc: " and len(line) > 6:
                         if bool( re.match(r"^X-cc: ([^@\.\t\n]+,?)+ *$", line) ):
                                 recipients_names += re.split(', ',line[6:-1])
+                                line = next(lines)
 
-                    elif line[:7]=="X-bcc: ":
+                                while line[0]=="	":
+                                    recipients_names += re.split(', |,',line[1:-1])
+                                    line = next(lines)
+                                recipients_names = [rec for rec in recipients_names if rec!=""]
+
+                    if line[:7]=="X-bcc: ":
                         header = False
+                        
                         if len(line) > 7:
                             if bool( re.match(r"^X-bcc: ([^@\.\t\n]+,?)+ *$", line) ):
-                                recipients_names += re.split(', ',line[6:-1])
+                                recipients_names += re.split(', ',line[7:-1])
+                                line = next(lines)
+
+                                while line[0]=="	":
+                                    recipients_names += re.split(', |,',line[1:-1])
+                                    line = next(lines)
+                                recipients_names = [rec for rec in recipients_names if rec!=""]
             
             ###### injection dans la db ######
             mailbox_tag = re.findall(r"\w+-\w",folder)
