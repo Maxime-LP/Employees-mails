@@ -79,7 +79,7 @@ def get_most_recent_mail(list_of_mails):
     if isinstance(list_of_mails,mail): return list_of_mails
     return max(list_of_mails, key=lambda x: x.mail_date)
 
-def PasDeDoublon(list):
+def PasDeDoublon(list: list ) -> list:
     new_list = []
     for element in list:
         if element not in new_list:
@@ -186,7 +186,7 @@ for folder,sub_folder,files in os.walk(data):
                                     recipients_names += re.split(', |,',line[1:-1])
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
-            
+
             recipients = PasDeDoublon(recipients)
             recipients_names = PasDeDoublon(recipients_names)
 
