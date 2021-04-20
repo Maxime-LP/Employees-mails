@@ -79,6 +79,13 @@ def get_most_recent_mail(list_of_mails):
     if isinstance(list_of_mails,mail): return list_of_mails
     return max(list_of_mails, key=lambda x: x.mail_date)
 
+def PasDeDoublon(list):
+    new_list = []
+    for element in list:
+        if element not in new_list:
+            new_list.append(element)
+    return new_list
+
 ############################
 
 #data =  "/home/amait/Downloads/maildir"
@@ -143,12 +150,11 @@ for folder,sub_folder,files in os.walk(data):
                         elif bool(re.match(r'.+@.+$', line)):
                             sender_name = None
                         
-                        elif bool(re.match(r'^X-From: [^@.]+$',line)):
-                            sender_name = line[8:-1]
-                        
+                        elif bool(re.match(r'^[^@.]+$',line)):
+                            sender_name = line[:-1]
 
                     elif line[:6]=="X-To: " and len(line)>6:
-                        if not bool("^X-To: undisclosed-recipients:, *$"):
+                        if not bool(re.match(r"^X-To: undisclosed-recipients:, *$",line)):
                             if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+( )*$", line) ):
                                 recipients_names += re.split(', ',line[6:-1])
                                 line = next(lines)
@@ -181,6 +187,9 @@ for folder,sub_folder,files in os.walk(data):
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
             
+            recipients = PasDeDoublon(recipients)
+            recipients_names = PasDeDoublon(recipients_names)
+
             ###### injection dans la db ######
             mailbox_tag = re.findall(r"\w+-\w",folder)
             #pour eviter les bugs avec des noms de dossier correspondant au pattern
@@ -231,7 +240,6 @@ for folder,sub_folder,files in os.walk(data):
                 
                 sender.save()
 
-
             #### Parcours de la liste des destinataires ####
             for index,recipient in enumerate(recipients):
                 
@@ -271,7 +279,6 @@ for folder,sub_folder,files in os.walk(data):
                     )
                     if recipients_names!=[]:
                         recipient.name = recipients_names[index]
-                    
                     recipient.save()
                     current_mail.save()
 
