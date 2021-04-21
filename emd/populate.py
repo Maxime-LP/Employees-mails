@@ -4,37 +4,37 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timedelta, make_aware, timezone
-from app.models import mailbox, mail_address, mail, user
+from app.models import mailbox, mail_address, mail, usr
 import xml.etree.ElementTree as ET
 import re
 
 ##################################################
 
-#path = os.getcwd()
+path = os.getcwd()
 #path = r'/home/amait/Documents/enron-mails/'
-path = r'C:\Users\lepau\OneDrive\Desktop'
+#path = r'C:\Users\lepau\OneDrive\Desktop'
 
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-"""
+
 #xml file
 tree = ET.parse(path + '/employes_enron.xml')
 root = tree.getroot()
 
 for child in root:
     current_mailbox = mailbox()
-    current_user = user()
-    current_user.inEnron = True
-    current_user.save()
+    current_usr = usr()
+    current_usr.inEnron = True
+    current_usr.save()
     current_mailbox.save()
     
     last_name = ''
     first_name = ''
 
     try:
-        current_user.category = child.attrib['category']
+        current_usr.category = child.attrib['category']
     except KeyError:
-        current_user.category = 'Employee'
+        current_usr.category = 'Employee'
 
     for subchild in child:
         if subchild.tag == 'lastname':
@@ -47,16 +47,16 @@ for child in root:
             new_mail = mail_address()
             new_mail.box_id = current_mailbox.id
             new_mail.address = subchild.attrib['address']
-            new_mail.user_id = current_user.id
+            new_mail.usr_id = current_usr.id
             new_mail.save()
         
         elif subchild.tag == 'mailbox':
             current_mailbox.tag = subchild.text
     
-    current_user.name = f"{first_name} {last_name}"
+    current_usr.name = f"{first_name} {last_name}"
     current_mailbox.save()
-    current_user.save()
-"""
+    current_usr.save()
+'''
 ##################################################
 
 ############################
@@ -206,11 +206,11 @@ for folder,sub_folder,files in os.walk(data):
 
                 if sender_name is not None: 
                     try:
-                        sender = user.objects.get(name=sender_name)
+                        sender = usr.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
-                        sender = user(name = sender_name)
+                        sender = usr(name = sender_name)
                 else: 
-                    sender = user(name = sender_name)
+                    sender = usr(name = sender_name)
 
                 if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
                     sender.inEnron = True
@@ -218,20 +218,20 @@ for folder,sub_folder,files in os.walk(data):
                     sender.inEnron = False
 
                 sender.save()
-                sender_mail = mail_address(address = sender_mail, user_id = sender.id)
+                sender_mail = mail_address(address = sender_mail, usr_id = sender.id)
                 sender_mail.save()
 
             try:
-                sender = user.objects.get(pk=sender_mail.user_id)   #on récupère le profil de l'envoyeur
+                sender = usr.objects.get(pk=sender_mail.usr_id)   #on récupère le profil de l'envoyeur
             except django.core.exceptions.ObjectDoesNotExist:             #s'il n'existe pas dans la db, on le crée
 
                 if sender_name is not None: 
                     try:
-                        sender = user.objects.get(name=sender_name)
+                        sender = usr.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
-                        sender = user(name = sender_name)
+                        sender = usr(name = sender_name)
                 else: 
-                    sender = user(name = sender_name)
+                    sender = usr(name = sender_name)
                 
                 if bool(re.match(r'^.+@.*enron.com$',sender_mail.address)):
                     sender.inEnron = True
@@ -245,23 +245,23 @@ for folder,sub_folder,files in os.walk(data):
                 
                 try:
                     recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur
-                    recipient = user.objects.get(pk=recipient_mail.user_id)
+                    recipient = usr.objects.get(pk=recipient_mail.usr_id)
                     
                 except django.core.exceptions.ObjectDoesNotExist:
                     #si le destinataire utilise une adresse enron on lui crée un enregistrement
                     if bool(re.match(r'^.+@.*enron.com$',recipient)):
                         recipient_mail = recipient
-                        recipient = user(inEnron = True)
+                        recipient = usr(inEnron = True)
                         recipient.save()
-                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail = mail_address(address = recipient_mail, usr_id = recipient.id)
                         recipient_mail.save()
                     
                     #sinon le destinataire est exterieur à enron et on regarde si l'envoyeur est chez enron
                     elif sender.inEnron :
                         recipient_mail = recipient
-                        recipient = user(inEnron = False)
+                        recipient = usr(inEnron = False)
                         recipient.save()
-                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail = mail_address(address = recipient_mail, usr_id = recipient.id)
                         recipient_mail.save()
                     
                     #si sender n'est pas d'Enron et que le destinataire ne l'est pas non plus
@@ -286,3 +286,4 @@ for folder,sub_folder,files in os.walk(data):
             ### fin de l'injection des informations
         ### fin de la lecture du mail
 
+'''
