@@ -78,7 +78,7 @@ def get_most_recent_mail(list_of_mails):
     """
     if isinstance(list_of_mails,mail):
         return list_of_mails
-    return max(list_of_mails, key=lambda x: x.mail_date)
+    return max(list_of_mails, key=lambda x: x.date)
 
 def PasDeDoublon(list: list ):
     new_list = []
@@ -90,7 +90,7 @@ def PasDeDoublon(list: list ):
 ############################
 
 #data =  "/home/amait/Downloads/maildir"
-data = path + r"\mailbox"
+data = '/home/amait/Downloads/maildir'
 
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
@@ -272,7 +272,7 @@ for folder,sub_folder,files in os.walk(data):
                 if recipient is not None:
                     current_mail = mail(
                         mailbox_id = current_mailbox.id,
-                        mail_date = date,
+                        date = date,
                         subject = subject,
                         sender_mail_id = sender_mail.id,
                         recipient_mail_id = recipient_mail.id,

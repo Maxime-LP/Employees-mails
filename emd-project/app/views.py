@@ -56,9 +56,9 @@ def employees(request):
 
     start_date = request.GET.get('start_date')
     if not start_date:
-        pass
+        print(type(start_date))
     else:
-        pass
+        print(start_date)
 
     end_date = request.GET.get('end_date')
     if not end_date:
@@ -73,7 +73,7 @@ def employees(request):
     else:
         usr = user.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
 
-    paginator = Paginator(usr, 100)
+    paginator = Paginator(usr, 300)
     page = request.GET.get('page')
     try:
         usr = paginator.page(page)
