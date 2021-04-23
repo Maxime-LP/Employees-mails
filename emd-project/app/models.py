@@ -71,4 +71,4 @@ class mail(models.Model):
     response = models.BooleanField(null=True)
 
     def __str__(self):
-        return self.date, self.sender_mail, self.recipient_mail, self.subject, self.response
+        return f"{self.date}, {self.sender_mail}, {self.recipient_mail}, {self.subject}, {self.response}"
