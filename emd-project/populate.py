@@ -155,11 +155,8 @@ for folder,sub_folder,files in os.walk(data):
                             sender_name = line[:-1]
                     
                     elif line[:6]=="X-To: " and len(line)>6:
-                        print('x-to')
                         if not bool(re.match(r"^X-To: undisclosed-recipients:, *$",line)):
-                            print('bool 1')
-                            if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+( )*$", line) ):
-                                print('bool 2')
+                            if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+ *$", line) ):
                                 recipients_names += re.split(', ',line[6:-1])
                                 line = next(lines)
 
@@ -167,8 +164,7 @@ for folder,sub_folder,files in os.walk(data):
                                     recipients_names += re.split(', |,',line[1:-1])
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
-                        else:
-                            print('not bool')
+
                     if line[:6]=="X-cc: " and len(line) > 6:
                         if bool( re.match(r"^X-cc: ([^@\.\t\n]+,?)+ *$", line) ):
                             recipients_names += re.split(', ',line[6:-1])
