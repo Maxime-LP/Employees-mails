@@ -10,13 +10,13 @@ import re
 
 ##################################################
 
-#path = os.getcwd()
+path = os.getcwd()
 #path = r'/home/amait/Documents/enron-mails/'
-path = r'C:\Users\lepau\OneDrive\Desktop'
+#path = r'C:\Users\lepau\OneDrive\Desktop'
 
 ###Populate mailbox and mail_address databases
 #uncomment to populate
-"""
+'''
 #xml file
 tree = ET.parse(path + '/employes_enron.xml')
 root = tree.getroot()
@@ -56,7 +56,7 @@ for child in root:
     current_user.name = f"{first_name} {last_name}"
     current_mailbox.save()
     current_user.save()
-"""
+'''
 ##################################################
 
 ############################
@@ -76,7 +76,8 @@ def get_most_recent_mail(list_of_mails):
     """
     Input must be a list of mail instances or an instance of mail
     """
-    if isinstance(list_of_mails,mail): return list_of_mails
+    if isinstance(list_of_mails,mail):
+        return list_of_mails
     return max(list_of_mails, key=lambda x: x.mail_date)
 
 def PasDeDoublon(list: list ):
@@ -285,4 +286,3 @@ for folder,sub_folder,files in os.walk(data):
             
             ### fin de l'injection des informations
         ### fin de la lecture du mail
-

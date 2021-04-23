@@ -72,11 +72,25 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # on utilise l'adaptateur postgresql
+        'NAME': 'amait', # le nom de notre base de données créée précédemment
+        'USER': 'amait', # attention : remplacez par votre nom d'utilisateur !!
+        'PASSWORD': '145491',
+        'HOST': 'savennieres.math.univ-angers.fr',
+        'PORT': '5432',
+        'OPTIONS': {
+            'options': '-c search_path=emd'
+          },
+        }
+    }
+"""
+DATABASES = {
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME'  : 'db.sqlite3',
     }
 }
-
+"""
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -99,9 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 
