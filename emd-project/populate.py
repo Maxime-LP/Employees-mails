@@ -256,10 +256,11 @@ for folder,sub_folder,files in os.walk(data):
                                 recipient = user.objects.get(inEnron = 1, name=recipients_names[index])
                             except django.core.exceptions.ObjectDoesNotExist:
                                 recipient = user(inEnron = True)
+                                recipient.save()
                         else:
                             recipient = user(inEnron = True)
+                            recipient.save()
 
-                        recipient.save()
                         recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
                     
@@ -271,10 +272,11 @@ for folder,sub_folder,files in os.walk(data):
                                 recipient = user.objects.get(inEnron = 0, name=recipients_names[index])
                             except django.core.exceptions.ObjectDoesNotExist:
                                 recipient = user(inEnron = False)
+                                recipient.save()
                         else:
                             recipient = user(inEnron = False)
+                            recipient.save()
 
-                        recipient.save()
                         recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
                     
