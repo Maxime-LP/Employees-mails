@@ -48,7 +48,7 @@ class mailbox(models.Model):
     #user = models.ForeignKey(user,null=True,on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.tag
+        return f"{self.tag}"
 
 
 class mail_address(models.Model):
@@ -58,7 +58,7 @@ class mail_address(models.Model):
     user = models.ForeignKey(user, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.address, self.box, self.user.name
+        return f"{self.address}, {self.box}, {self.user.name}"
 
 
 class mail(models.Model):
