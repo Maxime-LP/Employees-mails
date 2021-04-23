@@ -245,13 +245,19 @@ for folder,sub_folder,files in os.walk(data):
             for index,recipient in enumerate(recipients):
                 
                 try:
-                    recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur
-                    
+                    recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur   
                 except django.core.exceptions.ObjectDoesNotExist:
                     #si le destinataire utilise une adresse enron on lui crée un enregistrement
                     if bool(re.match(r'^.+@.*enron.com$',recipient)):
                         recipient_mail = recipient
-                        recipient = user(inEnron = True)
+                        if recipients_names!=[]:
+                            try:
+                                recipient = user.objects.get(inEnron = 1, name=recipients_names[index])
+                            except django.core.exceptions.ObjectDoesNotExist:
+                                recipient = user(inEnron = True)
+                        else:
+                            recipient = user(inEnron = True)
+
                         recipient.save()
                         recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
@@ -259,7 +265,14 @@ for folder,sub_folder,files in os.walk(data):
                     #sinon le destinataire est exterieur à enron et on regarde si l'envoyeur est chez enron
                     elif sender.inEnron :
                         recipient_mail = recipient
-                        recipient = user(inEnron = False)
+                        if recipients_names!=[]:
+                            try:
+                                recipient = user.objects.get(inEnron = 0, name=recipients_names[index])
+                            except django.core.exceptions.ObjectDoesNotExist:
+                                recipient = user(inEnron = False)
+                        else:
+                            recipient = user(inEnron = False)
+
                         recipient.save()
                         recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
