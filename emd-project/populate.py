@@ -167,13 +167,13 @@ for folder,sub_folder,files in os.walk(data):
 
                     if line[:6]=="X-cc: " and len(line) > 6:
                         if bool( re.match(r"^X-cc: ([^@\.\t\n]+,?)+ *$", line) ):
-                                recipients_names += re.split(', ',line[6:-1])
-                                line = next(lines)
+                            recipients_names += re.split(', ',line[6:-1])
+                            line = next(lines)
 
-                                while bool(re.match(r"^[ \t]+.*$",line)):
-                                    recipients_names += re.split(', |,',line[1:-1])
-                                    line = next(lines)
-                                recipients_names = [rec for rec in recipients_names if rec!=""]
+                            while bool(re.match(r"^[ \t]+.*$",line)):
+                                recipients_names += re.split(', |,',line[1:-1])
+                                line = next(lines)
+                            recipients_names = [rec for rec in recipients_names if rec!=""]
 
                     if line[:7]=="X-bcc: ":
                         header = False
