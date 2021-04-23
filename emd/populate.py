@@ -79,7 +79,7 @@ def get_most_recent_mail(list_of_mails):
     if isinstance(list_of_mails,mail): return list_of_mails
     return max(list_of_mails, key=lambda x: x.mail_date)
 
-def PasDeDoublon(list: list ) -> list:
+def PasDeDoublon(list: list ):
     new_list = []
     for element in list:
         if element not in new_list:
