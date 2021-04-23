@@ -243,9 +243,10 @@ for folder,sub_folder,files in os.walk(data):
 
             #### Parcours de la liste des destinataires ####
             for index,recipient in enumerate(recipients):
-                
+
                 try:
                     recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur   
+                    recipient = recipient_mail.user
                 except django.core.exceptions.ObjectDoesNotExist:
                     #si le destinataire utilise une adresse enron on lui crée un enregistrement
                     if bool(re.match(r'^.+@.*enron.com$',recipient)):
