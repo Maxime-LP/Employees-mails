@@ -38,7 +38,7 @@ class user(models.Model):
     category = models.CharField(null=True,max_length=40)
 
     def __str__(self):
-        return self.name, self.inEnron, self.category
+        return f"{self.name}, {self.inEnron}, {self.category}"
 
 
 
