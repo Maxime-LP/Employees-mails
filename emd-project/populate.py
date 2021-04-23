@@ -153,8 +153,8 @@ for folder,sub_folder,files in os.walk(data):
                         
                         elif bool(re.match(r'^[^@.]+$',line)):
                             sender_name = line[:-1]
-
-                    elif line[:6]=="X-To: " and len(line)>6:
+                    
+                    if line[:6]=="X-To: " and len(line)>6:
                         if not bool(re.match(r"^X-To: undisclosed-recipients:, *$",line)):
                             if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+( )*$", line) ):
                                 recipients_names += re.split(', ',line[6:-1])
@@ -187,6 +187,7 @@ for folder,sub_folder,files in os.walk(data):
                                     recipients_names += re.split(', |,',line[1:-1])
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
+
 
             recipients = PasDeDoublon(recipients)
             recipients_names = PasDeDoublon(recipients_names)
