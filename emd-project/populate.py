@@ -114,7 +114,7 @@ for folder,sub_folder,files in os.walk(data):
                         recipients += re.split(', |,',line[4:-1])
                         line = next(lines)
 
-                        while line[0]=="	":
+                        while bool(re.match(r"^[ \t]+.*$",line)):
                             recipients += re.split(', |,',line[1:-1])
                             line = next(lines)
                         recipients = [rec for rec in recipients if rec!=""]
@@ -123,7 +123,7 @@ for folder,sub_folder,files in os.walk(data):
                         recipients += re.split(', |,',line[5:-1])
                         line = next(lines)
 
-                        while line[0]=="	":
+                        while bool(re.match(r"^[ \t]+.*$",line)):
                             recipients += re.split(', |,',line[1:-1])
                             line = next(lines)
                         recipients = [rec for rec in recipients if rec!=""]
@@ -160,7 +160,7 @@ for folder,sub_folder,files in os.walk(data):
                                 recipients_names += re.split(', ',line[6:-1])
                                 line = next(lines)
 
-                                while line[0]=="	":
+                                while bool(re.match(r"^[ \t]+.*$",line)):
                                     recipients_names += re.split(', |,',line[1:-1])
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
@@ -170,7 +170,7 @@ for folder,sub_folder,files in os.walk(data):
                                 recipients_names += re.split(', ',line[6:-1])
                                 line = next(lines)
 
-                                while line[0]=="	":
+                                while bool(re.match(r"^[ \t]+.*$",line)):
                                     recipients_names += re.split(', |,',line[1:-1])
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
@@ -183,7 +183,7 @@ for folder,sub_folder,files in os.walk(data):
                                 recipients_names += re.split(', ',line[7:-1])
                                 line = next(lines)
 
-                                while line[0]=="	":
+                                while bool(re.match(r"^[ \t]+.*$",line)):
                                     recipients_names += re.split(', |,',line[1:-1])
                                     line = next(lines)
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
