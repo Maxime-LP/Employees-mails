@@ -111,6 +111,7 @@ for folder,sub_folder,files in os.walk(data):
             for line in lines:
                 if header:
                     if (line[:4]=="To: " or line[:4]=="Cc: ") and len(line) > 4:
+                        print('To')
                         recipients += re.split(', |,',line[4:-1])
                         line = next(lines)
 
@@ -120,6 +121,7 @@ for folder,sub_folder,files in os.walk(data):
                         recipients = [rec for rec in recipients if rec!=""]
                     
                     if line[:5]=="Bcc: " and len(line) > 5:
+                        print("bcc")
                         recipients += re.split(', |,',line[5:-1])
                         line = next(lines)
 
@@ -154,7 +156,8 @@ for folder,sub_folder,files in os.walk(data):
                         elif bool(re.match(r'^[^@.]+$',line)):
                             sender_name = line[:-1]
                     
-                    if line[:6]=="X-To: " and len(line)>6:
+                    elif line[:6]=="X-To: " and len(line)>6:
+                        print('x-to')
                         if not bool(re.match(r"^X-To: undisclosed-recipients:, *$",line)):
                             if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+( )*$", line) ):
                                 recipients_names += re.split(', ',line[6:-1])
@@ -166,6 +169,7 @@ for folder,sub_folder,files in os.walk(data):
                                 recipients_names = [rec for rec in recipients_names if rec!=""]
 
                     if line[:6]=="X-cc: " and len(line) > 6:
+                        print('x-cc')
                         if bool( re.match(r"^X-cc: ([^@\.\t\n]+,?)+ *$", line) ):
                             recipients_names += re.split(', ',line[6:-1])
                             line = next(lines)
@@ -176,6 +180,7 @@ for folder,sub_folder,files in os.walk(data):
                             recipients_names = [rec for rec in recipients_names if rec!=""]
 
                     if line[:7]=="X-bcc: ":
+                        print('x-bcc')
                         header = False
                         
                         if len(line) > 7:
