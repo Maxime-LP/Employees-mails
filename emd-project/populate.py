@@ -187,8 +187,7 @@ for folder,sub_folder,files in os.walk(data):
                     for recipient,element in zip(recipients,potential_names):
                         if bool(re.match(r"^[^@\.\t\n]+ *$", element)):
                             recipients_names[recipient] = element
-
-
+            
             ###### injection dans la db ######
             mailbox_tag = re.findall(r"\w+-\w",folder)
             #pour eviter les bugs avec des noms de dossier correspondant au pattern
