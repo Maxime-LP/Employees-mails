@@ -7,12 +7,13 @@ from django.utils.timezone import datetime, timedelta, make_aware, timezone
 from app.models import mailbox, mail_address, mail, user
 import xml.etree.ElementTree as ET
 import re
+from collections import defaultdict
 
 ##################################################
 
-path = os.getcwd()
+#path = os.getcwd()
 #path = r'/home/amait/Documents/enron-mails/'
-#path = r'C:\Users\lepau\OneDrive\Desktop'
+path = r'C:\Users\lepau\OneDrive\Desktop'
 
 ###Populate mailbox and mail_address databases
 #uncomment to populate
@@ -89,8 +90,8 @@ def PasDeDoublon(list: list ):
 
 ############################
 
-#data =  "/home/amait/Downloads/maildir"
-data = '/home/amait/Downloads/maildir'
+data =  path + '\mailbox'
+#data = '/home/amait/Downloads/maildir'
 
 #Populate mail database
 for folder,sub_folder,files in os.walk(data):
@@ -102,7 +103,8 @@ for folder,sub_folder,files in os.walk(data):
         #lecture d'un mail
         with open(file_path,'r') as file:
             recipients = []
-            recipients_names = []
+            potential_names = []
+            recipients_names = defaultdict(lambda: None)
             header = True
             response = False
 
@@ -156,41 +158,36 @@ for folder,sub_folder,files in os.walk(data):
                     
                     elif line[:6]=="X-To: " and len(line)>6:
                         if not bool(re.match(r"^X-To: undisclosed-recipients:, *$",line)):
-                            if bool( re.match(r"^X-To: ([^@\.\t\n]+,?)+ *$", line) ):
-                                recipients_names += re.split(', ',line[6:-1])
-                                line = next(lines)
-
-                                while bool(re.match(r"^[ \t]+.*$",line)):
-                                    recipients_names += re.split(', |,',line[1:-1])
-                                    line = next(lines)
-                                recipients_names = [rec for rec in recipients_names if rec!=""]
-
-                    if line[:6]=="X-cc: " and len(line) > 6:
-                        if bool( re.match(r"^X-cc: ([^@\.\t\n]+,?)+ *$", line) ):
-                            recipients_names += re.split(', ',line[6:-1])
+                            potential_names += re.split(', ',line[6:-1])
                             line = next(lines)
 
                             while bool(re.match(r"^[ \t]+.*$",line)):
-                                recipients_names += re.split(', |,',line[1:-1])
+                                potential_names += re.split(', ',line[6:-1])
                                 line = next(lines)
-                            recipients_names = [rec for rec in recipients_names if rec!=""]
+
+                    if line[:6]=="X-cc: " and len(line) > 6:
+                        potential_names += re.split(', ',line[6:-1])
+                        line = next(lines)
+
+                        while bool(re.match(r"^[ \t]+.*$",line)):
+                            potential_names += re.split(', ',line[6:-1])
+                            line = next(lines)
 
                     if line[:7]=="X-bcc: ":
                         header = False
                         
                         if len(line) > 7:
-                            if bool( re.match(r"^X-bcc: ([^@\.\t\n]+,?)+ *$", line) ):
-                                recipients_names += re.split(', ',line[7:-1])
+                            potential_names += re.split(', ',line[7:-1])
+                            line = next(lines)
+
+                            while bool(re.match(r"^[ \t]+.*$",line)):
+                                potential_names += re.split(', ',line[7:-1])
                                 line = next(lines)
 
-                                while bool(re.match(r"^[ \t]+.*$",line)):
-                                    recipients_names += re.split(', |,',line[1:-1])
-                                    line = next(lines)
-                                recipients_names = [rec for rec in recipients_names if rec!=""]
+                    for recipient,element in zip(recipients,potential_names):
+                        if bool(re.match(r"^[^@\.\t\n]+ *$", element)):
+                            recipients_names[recipient] = element
 
-
-            recipients = PasDeDoublon(recipients)
-            recipients_names = PasDeDoublon(recipients_names)
 
             ###### injection dans la db ######
             mailbox_tag = re.findall(r"\w+-\w",folder)
@@ -243,7 +240,7 @@ for folder,sub_folder,files in os.walk(data):
                 sender.save()
 
             #### Parcours de la liste des destinataires ####
-            for index,recipient in enumerate(recipients):
+            for recipient in recipients:
 
                 try:
                     recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur   
@@ -252,9 +249,9 @@ for folder,sub_folder,files in os.walk(data):
                     #si le destinataire utilise une adresse enron on lui crée un enregistrement
                     if bool(re.match(r'^.+@.*enron.com$',recipient)):
                         recipient_mail = recipient
-                        if recipients_names!=[]:
+                        if recipients_names[recipient] is not None:
                             try:
-                                recipient = user.objects.get(inEnron = 1, name=recipients_names[index])
+                                recipient = user.objects.get(inEnron = 1, name=recipients_names[recipient])
                             except django.core.exceptions.ObjectDoesNotExist:
                                 recipient = user(inEnron = True)
                                 recipient.save()
@@ -268,9 +265,9 @@ for folder,sub_folder,files in os.walk(data):
                     #sinon le destinataire est exterieur à enron et on regarde si l'envoyeur est chez enron
                     elif sender.inEnron :
                         recipient_mail = recipient
-                        if recipients_names!=[]:
+                        if recipients_names[recipient] is not None:
                             try:
-                                recipient = user.objects.get(inEnron = 0, name=recipients_names[index])
+                                recipient = user.objects.get(inEnron = 0, name=recipients_names[recipient])
                             except django.core.exceptions.ObjectDoesNotExist:
                                 recipient = user(inEnron = False)
                                 recipient.save()
@@ -294,8 +291,8 @@ for folder,sub_folder,files in os.walk(data):
                         recipient_mail_id = recipient_mail.id,
                         response = response
                     )
-                    if recipients_names!=[]:
-                        recipient.name = recipients_names[index]
+                    if recipients_names[recipient] is not None:
+                        recipient.name = recipients_names[recipient]
                     recipient.save()
                     current_mail.save()
 
