@@ -204,14 +204,21 @@ def update_database(emails):
 
 
 if __name__=="__main__":
-    
-    #preprocessXMLFile()
+
+    x = input('Proprocess XML file (0/1)? ')
+    if bool(int(x)):
+        preprocessXMLFile()
     
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
-    pickle_fp = create_pickle(data_fp, name=pkl_file_name)
 
-    emails = load_data(pickle_fp=os.path.join(pkl_file_name))
+    x =  input('Create pickle file (0/1)? ')
+    if bool(int(x)):
+        pkl_fp = create_pickle(data_fp, name=pkl_file_name)
+    else:
+        pkl_fp = os.path.join(pkl_file_name)
+
+    emails = load_data(pickle_fp=pkl_fp)
 
     update_database(emails)
     
