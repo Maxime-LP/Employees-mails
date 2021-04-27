@@ -5,10 +5,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 #from django.contrib.auth.models import User
 from django.db import models
-from django import forms
 
-class NameForm(forms.Form):
-    your_name = forms.CharField(label='Your name', max_length=100)
 """ #modèle 1
 class mailbox(models.Model):
     tag = models.CharField(max_length=40)
@@ -31,44 +28,42 @@ class mail(models.Model):
 """
 
 #modèle 2
-class user(models.Model):
+class User(models.Model):
     
-    name = models.CharField(null=True,max_length=80)
+    name = models.CharField(null=True, max_length=100)
     inEnron = models.BooleanField(null=False)
-    category = models.CharField(null=True,max_length=40)
+    category = models.CharField(null=True, max_length=40)
 
     def __str__(self):
         return f"{self.name}, {self.inEnron}, {self.category}"
 
 
 
-class mailbox(models.Model):
-    
+class Mailbox(models.Model):
     tag = models.CharField(max_length=40)
-    #user = models.ForeignKey(user,null=True,on_delete=models.CASCADE)
     
     def __str__(self):
         return f"{self.tag}"
 
 
-class mail_address(models.Model):
+class mailAddress(models.Model):
     
-    address = models.EmailField(max_length=100)
-    box = models.ForeignKey(mailbox, null=True, on_delete=models.CASCADE)
-    user = models.ForeignKey(user, null=True, on_delete=models.CASCADE)
+    address = models.EmailField(max_length=200)
+    box = models.ForeignKey(Mailbox, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.address}, {self.box}, {self.user.name}"
 
 
-class mail(models.Model):
-    
-    mailbox = models.ForeignKey(mailbox,null=True,on_delete=models.CASCADE,related_name='+')
+class Mail(models.Model):
+    enron_id = models.CharField(max_length=120)
+    mailbox = models.ForeignKey(Mailbox, null=True, on_delete=models.CASCADE, related_name='+')
     date = models.DateTimeField(null=True)
-    subject = models.CharField(max_length=60,null=True)
-    sender_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='sender_mail_id')
-    recipient_mail = models.ForeignKey(mail_address,null=True,on_delete=models.CASCADE,related_name='recipient_mail_id')
-    response = models.BooleanField(null=True)
+    subject = models.CharField(max_length=200,null=True)
+    sender = models.ForeignKey(mailAddress,null=True,on_delete=models.CASCADE,related_name='sender_mail_id')
+    recipient = models.ForeignKey(mailAddress,null=True,on_delete=models.CASCADE,related_name='recipient_mail_id')
+    isReply = models.BooleanField(null=True)
 
     def __str__(self):
-        return f"{self.date}, {self.sender_mail}, {self.recipient_mail}, {self.subject}, {self.response}"
+        return f"{self.date}, {self.sender}, {self.recipient}, {self.subject}, {self.isReply}"

@@ -4,7 +4,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timedelta, make_aware, timezone
-from app.models import mailbox, mail_address, mail, user
+from app.models import Mailbox, mailAddress, Mail, User
 import xml.etree.ElementTree as ET
 import re
 from collections import defaultdict
@@ -21,7 +21,6 @@ path = r'C:\Users\lepau\OneDrive\Desktop'
 #xml file
 tree = ET.parse(path + '/employes_enron.xml')
 root = tree.getroot()
-
 for child in root:
     current_mailbox = mailbox()
     current_user = user()
@@ -31,19 +30,15 @@ for child in root:
     
     last_name = ''
     first_name = ''
-
     try:
         current_user.category = child.attrib['category']
     except KeyError:
         current_user.category = 'Employee'
-
     for subchild in child:
         if subchild.tag == 'lastname':
             last_name = subchild.text
-
         elif subchild.tag == 'firstname':
             first_name = subchild.text
-
         elif subchild.tag == 'email':
             new_mail = mail_address()
             new_mail.box_id = current_mailbox.id
@@ -90,15 +85,16 @@ def PasDeDoublon(list: list ):
 
 ############################
 
-data =  path + '\mailbox'
-#data = '/home/amait/Downloads/maildir'
+#data_fp =  path + '\mailbox'
+data_fp = '/home/amait/Downloads/maildir'
 
 #Populate mail database
-for folder,sub_folder,files in os.walk(data):
-
+for folder,sub_folder,files in os.walk(data_fp):
     for file in files:
         file_path = os.path.join(folder,file)
-        print("\n fp : ",file_path)
+
+        
+        print("\n fp : ", file_path)
         
         #lecture d'un mail
         with open(file_path,'r') as file:
@@ -106,7 +102,7 @@ for folder,sub_folder,files in os.walk(data):
             potential_names = []
             recipients_names = defaultdict(lambda: None)
             header = True
-            response = False
+            isReply = False
 
             ###### extraction des informations ######
             lines = iter(file.readlines())
@@ -140,7 +136,7 @@ for folder,sub_folder,files in os.walk(data):
                         subject = line[9:]
                         
                         if subject[:3] == "Re:":
-                            response = True
+                            isReply = True
 
                     elif line[:8]=="X-From: ":
                         line = line[8:]
@@ -193,22 +189,22 @@ for folder,sub_folder,files in os.walk(data):
             #pour eviter les bugs avec des noms de dossier correspondant au pattern
             for tag in mailbox_tag:
                 try:
-                    current_mailbox = mailbox.objects.get(tag=tag)
+                    current_mailbox = Mailbox.objects.get(tag=tag)
                 except django.core.exceptions.ObjectDoesNotExist:
                     pass
             
             #### Recupération des instances correspondant au profil utilisateur et au mail de l'envoyeur ####
             try:
-                sender_mail = mail_address.objects.get(address=sender_mail)  #on récupère le mail de l'envoyeur
+                sender_mail = mailAddress.objects.get(address=sender_mail)  #on récupère le mail de l'envoyeur
             except django.core.exceptions.ObjectDoesNotExist:                   #s'il n'existe pas dans la db, on le crée
 
                 if sender_name is not None: 
                     try:
-                        sender = user.objects.get(name=sender_name)
+                        sender = User.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
-                        sender = user(name = sender_name)
+                        sender = User(name = sender_name)
                 else: 
-                    sender = user(name = sender_name)
+                    sender = User(name = sender_name)
 
                 if bool(re.match(r'^.+@.*enron.com$',sender_mail)):
                     sender.inEnron = True
@@ -216,20 +212,20 @@ for folder,sub_folder,files in os.walk(data):
                     sender.inEnron = False
 
                 sender.save()
-                sender_mail = mail_address(address = sender_mail, user_id = sender.id)
+                sender_mail = mailAddress(address = sender_mail, user_id = sender.id)
                 sender_mail.save()
 
             try:
-                sender = user.objects.get(pk=sender_mail.user_id)   #on récupère le profil de l'envoyeur
+                sender = User.objects.get(pk=sender_mail.user_id)   #on récupère le profil de l'envoyeur
             except django.core.exceptions.ObjectDoesNotExist:             #s'il n'existe pas dans la db, on le crée
 
                 if sender_name is not None: 
                     try:
-                        sender = user.objects.get(name=sender_name)
+                        sender = User.objects.get(name=sender_name)
                     except django.core.exceptions.ObjectDoesNotExist:
-                        sender = user(name = sender_name)
+                        sender = User(name = sender_name)
                 else: 
-                    sender = user(name = sender_name)
+                    sender = User(name = sender_name)
                 
                 if bool(re.match(r'^.+@.*enron.com$',sender_mail.address)):
                     sender.inEnron = True
@@ -242,7 +238,7 @@ for folder,sub_folder,files in os.walk(data):
             for recipient in recipients:
 
                 try:
-                    recipient_mail = mail_address.objects.get(address=recipient)    #on récupère l'id de l'envoyeur   
+                    recipient_mail = mailAddress.objects.get(address=recipient)    #on récupère l'id de l'envoyeur   
                     recipient = recipient_mail.user
                 except django.core.exceptions.ObjectDoesNotExist:
                     #si le destinataire utilise une adresse enron on lui crée un enregistrement
@@ -250,15 +246,15 @@ for folder,sub_folder,files in os.walk(data):
                         recipient_mail = recipient
                         if recipients_names[recipient] is not None:
                             try:
-                                recipient = user.objects.get(inEnron = 1, name=recipients_names[recipient])
+                                recipient = User.objects.get(inEnron = 1, name=recipients_names[recipient])
                             except django.core.exceptions.ObjectDoesNotExist:
-                                recipient = user(inEnron = True)
+                                recipient = User(inEnron = True)
                                 recipient.save()
                         else:
-                            recipient = user(inEnron = True)
+                            recipient = User(inEnron = True)
                             recipient.save()
 
-                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail = mailAddress(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
                     
                     #sinon le destinataire est exterieur à enron et on regarde si l'envoyeur est chez enron
@@ -266,15 +262,15 @@ for folder,sub_folder,files in os.walk(data):
                         recipient_mail = recipient
                         if recipients_names[recipient] is not None:
                             try:
-                                recipient = user.objects.get(inEnron = 0, name=recipients_names[recipient])
+                                recipient = User.objects.get(inEnron = 0, name=recipients_names[recipient])
                             except django.core.exceptions.ObjectDoesNotExist:
-                                recipient = user(inEnron = False)
+                                recipient = User(inEnron = False)
                                 recipient.save()
                         else:
-                            recipient = user(inEnron = False)
+                            recipient = User(inEnron = False)
                             recipient.save()
 
-                        recipient_mail = mail_address(address = recipient_mail, user_id = recipient.id)
+                        recipient_mail = mailAddress(address = recipient_mail, user_id = recipient.id)
                         recipient_mail.save()
                     
                     #si sender n'est pas d'Enron et que le destinataire ne l'est pas non plus
@@ -282,13 +278,13 @@ for folder,sub_folder,files in os.walk(data):
                         recipient = None                            
                 
                 if recipient is not None:
-                    current_mail = mail(
-                        mailbox_id = current_mailbox.id,
+                    current_mail = Mail(
+                        mailbox = current_mailbox,
                         date = date,
                         subject = subject,
-                        sender_mail_id = sender_mail.id,
-                        recipient_mail_id = recipient_mail.id,
-                        response = response
+                        sender = sender_mail,
+                        recipient = recipient_mail,
+                        isReply = isReply
                     )
                     if recipients_names[recipient] is not None:
                         recipient.name = recipients_names[recipient]

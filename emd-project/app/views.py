@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
 from django.http import HttpResponse
 from django import template
-from app.models import user, mailbox, mail_address, mail
+from app.models import User, Mailbox, mailAddress, Mail
 
 #@login_required(login_url="/login/")
 def index(request):
@@ -49,7 +49,7 @@ def employees(request):
     quer = request.GET.get('quer')
     #current_name = query
     if not quer:
-        usr = user.objects.all()
+        usr = User.objects.all()
         pass
     else:
         pass
@@ -69,9 +69,9 @@ def employees(request):
     lines = request.GET.get('lines')
     if not lines:
         lines = 10
-        usr = user.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
+        usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
     else:
-        usr = user.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
+        usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
 
     paginator = Paginator(usr, 300)
     page = request.GET.get('page')
