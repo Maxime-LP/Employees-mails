@@ -23,8 +23,7 @@ def preprocessXMLFile():
 
     for child in root:
         current_mailbox = Mailbox()
-        current_user = User()
-        current_user.inEnron = True
+        current_user = User(inEnron = True)
         current_user.save()
         current_mailbox.save()
         
@@ -44,10 +43,7 @@ def preprocessXMLFile():
                 first_name = subchild.text
 
             elif subchild.tag == 'email':
-                new_mail = mailAddress()
-                new_mail.box_id = current_mailbox.id
-                new_mail.address = subchild.attrib['address']
-                new_mail.user_id = current_user.id
+                new_mail = mailAddress(box_id = current_mailbox.id, address = subchild.attrib['address'], user_id = current_user.id)
                 new_mail.save()
             
             elif subchild.tag == 'mailbox':
