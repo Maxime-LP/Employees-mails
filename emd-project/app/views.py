@@ -107,3 +107,15 @@ def employees(request):
             )
         })
     """
+
+@login_required(login_url="/login/")
+def couples(request):
+    pass
+
+@login_required(login_url="/login/")
+def days(request):
+    pass
+
+@login_required(login_url="/login/")
+def profiles(request):
+    pass
