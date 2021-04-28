@@ -106,9 +106,7 @@ def create_pickle(data_fp, name):
             n  = progress_info(n, prefix="Analyzing data:")
             with open(fp, 'r') as f:
                 try:
-                    #e = email.parser.Parser().parse(f, headersonly=True)
                     e = email.message_from_file(f)
-                    #headers.append(email.parser.Parser().parse(f, headersonly=True))
                 except UnicodeDecodeError as error:
                     # use 'iso-8859-1' charset
                     pass
@@ -157,8 +155,8 @@ def catch_infos(mail):
 
     # mail_recipients
     mail_recipients = []
-    recipient_field = ['To', 'X-To', 'Cc', 'X-cc', 'Bcc', 'X-bcc']
-    for field in recipient_field:
+    recipient_fields = ['To', 'X-To', 'Cc', 'X-cc', 'Bcc', 'X-bcc']
+    for field in recipient_fields:
         try:
             mail_recipients += re.split(',', re.sub(r"\s+", "", mail[field])) #flags=re.UNICODE))
         except KeyError: pass
