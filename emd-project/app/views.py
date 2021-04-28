@@ -117,5 +117,5 @@ def days(request):
     pass
 
 @login_required(login_url="/login/")
-def profiles(request):
+def profile(request):
     pass

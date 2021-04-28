@@ -12,7 +12,7 @@ urlpatterns = [
     re_path(r'employees', views.employees, name='employees'),
     re_path(r'couples', views.couples, name='couples'),
     re_path(r'days', views.days, name='days'),
-    re_path(r'profiles', views.profiles, name='profiles'),
+    re_path(r'profile', views.profile, name='profiles'),
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),
 ]
