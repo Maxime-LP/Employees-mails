@@ -11,7 +11,6 @@ from django.http import HttpResponse
 from django import template
 from app.models import User, Mailbox, mailAddress, Mail
 
-#@login_required(login_url="/login/")
 def index(request):
     
     context = {
@@ -21,7 +20,6 @@ def index(request):
     html_template = loader.get_template( 'index.html' )
     return HttpResponse(html_template.render(context, request))
 
-#@login_required(login_url="/login/")
 def pages(request):
     context = {}
     # All resource paths end in .html.
@@ -44,7 +42,6 @@ def pages(request):
         html_template = loader.get_template( 'page-500.html' )
         return HttpResponse(html_template.render(context, request))
 
-@login_required(login_url="/login/")
 def employees(request):
 
     quer = request.GET.get('quer')
@@ -109,15 +106,12 @@ def employees(request):
         })
     """
 
-@login_required(login_url="/login/")
 def couples(request):
     pass
 
-@login_required(login_url="/login/")
 def days(request):
     pass
 
-@login_required(login_url="/login/")
 def profile(request):
 
     user = request.GET.get('user')
@@ -128,31 +122,35 @@ def profile(request):
     except django.core.exceptions.ObjectDoesNotExist:
         raise Exception("User does not exist")
 
-    sent_mails = Mail.objects.raw('SELECT mail FROM Mail WHERE user.id == mail.sender_id;')
+    sent_mails = Mail.objects.raw(f'SELECT mail FROM app_Mail JOIN app_mailAddress ON app_mailAdress.user_id = {user.id} AND app_mailAdress.id = mail.sender_id;')
     mean_response_time = 0
     n=0
 
     for current_mail in sent_mails:
         if current_mail.reponse:
             try:
-                previous_mail = Mail.objects.raw('SELECT mail FROM Mail WHERE current_mail.sender_id == mail.recipient_id, mail.date < current_mail.date ORDER BY Mail.date LIMIT 1;')
+                previous_mail = Mail.objects.raw("""SELECT mail FROM app_Mail WHERE current_mail.sender_id = mail.recipient_id, mail.date < current_mail.date 
+                                                    ORDER BY app_Mail.date DESC LIMIT 1;""")
             except django.core.exceptions.ObjectDoesNotExist:
                 previous_mail = None
 
             if previous_mail is not None:
                 n+=1
-                mean_response_time += current_mail.date - previous_mail.date #??
+                mean_response_time += (current_mail.date - previous_mail.date).total_seconds()
     
     if n!=0:
         mean_response_time /= n
 
-    number_of_internal_mails = 0
+    number_of_internal_mails = Mail.objects.raw("""SELECT mail COUNT(*) FROM Mail JOIN app_user 
+                                                ON app_user.inEnron=1, 
+                                                                                                        """)
     number_of_external_mails = 0
 
     internal_contacts = User.objects.raw()
 
     context = {
-        'mean_response_time' = mean_response_time
+        'user':user,
+        'mean_response_time': mean_response_time
         }
 
-    return render(request, 'profile.html', context)
+    return render(request, 'profile_enron.html', context)
