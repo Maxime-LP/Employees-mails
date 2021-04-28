@@ -10,6 +10,8 @@ from django.template import loader
 from django.http import HttpResponse
 from django import template
 from app.models import User, Mailbox, mailAddress, Mail
+from collections import defaultdict
+import numpy as np
 
 def index(request):
     
@@ -121,36 +123,62 @@ def profile(request):
         user = User.objects.get(name = user)
     except django.core.exceptions.ObjectDoesNotExist:
         raise Exception("User does not exist")
-
-    sent_mails = Mail.objects.raw(f'SELECT mail FROM app_Mail JOIN app_mailAddress ON app_mailAdress.user_id = {user.id} AND app_mailAdress.id = mail.sender_id;')
-    mean_response_time = 0
-    n=0
-
-    for current_mail in sent_mails:
-        if current_mail.reponse:
-            try:
-                previous_mail = Mail.objects.raw("""SELECT mail FROM app_Mail WHERE current_mail.sender_id = mail.recipient_id, mail.date < current_mail.date 
-                                                    ORDER BY app_Mail.date DESC LIMIT 1;""")
-            except django.core.exceptions.ObjectDoesNotExist:
-                previous_mail = None
-
-            if previous_mail is not None:
-                n+=1
-                mean_response_time += (current_mail.date - previous_mail.date).total_seconds()
     
-    if n!=0:
-        mean_response_time /= n
 
-    number_of_internal_mails = Mail.objects.raw(f"""SELECT mail FROM app_Mail JOIN app_mailAddress ON app_mailAdress.user_id = {user.id} 
-                                                    AND (app_mailAdress.id = mail.sender_id OR app_mailAdress.id = mail.recipient_id)
-                                                                                                        ;""")
+    mails = Mail.objects.raw(f"""SELECT mail, COUNT(*) FROM app_Mail JOIN app_mailAddress ON app_mailAdress.user_id = {user.id} 
+                                    AND (app_mailAddress.id = mail.sender_id OR app_mailAdress.id = mail.recipient_id);""")
+    mean_response_time = 0
+    number_of_responses = 0
+    number_of_internal_mails = 0
     number_of_external_mails = 0
+    internal_contacts = []
+    daily_mails = defaultdict(lambda: 0)
 
-    internal_contacts = User.objects.raw()
+    for mail in mails:
+        daily_mails[mail.date]+=1
+        sender=User.objects.get(id=mail.sender_id)
+        recipient=User.objects.get(id=mail.recipient_id)
 
+        if sender.name == user.name:
+            if recipient.inEnron:
+                number_of_internal_mails+=1
+                internal_contacts.append(recipient.name)
+            else:
+                number_of_external_mails+=1
+
+            if mail.isReply:
+                try:
+                    previous_mail = Mail.objects.raw("""SELECT mail FROM app_Mail WHERE current_mail.sender_id = mail.recipient_id, mail.date < current_mail.date 
+                                                        ORDER BY app_Mail.date DESC LIMIT 1;""")
+                except django.core.exceptions.ObjectDoesNotExist:
+                    previous_mail = None
+
+                if previous_mail is not None:
+                    number_of_responses+=1
+                    mean_response_time += (mail.date - previous_mail.date).total_seconds()
+
+        else:
+            if sender.inEnron:
+                number_of_internal_mails+=1
+            else:
+                number_of_external_mails+=1
+    
+    internal_contacts = set(internal_contacts)
+        
+    if number_of_responses!=0:
+        mean_response_time /= number_of_responses
+    
+    if number_of_external_mails==0:
+        ratio = number_of_internal_mails
+    else:
+        ratio = number_of_internal_mails/number_of_external_mails
+    
     context = {
         'user':user,
-        'mean_response_time': mean_response_time
+        'daily_mean':np.mean(list(daily_mails.values())),
+        'mean_response_time': mean_response_time,
+        'ratio':ratio,
+        'internal_contacts':internal_contacts
         }
 
     return render(request, 'profile_enron.html', context)
