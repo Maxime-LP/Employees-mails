@@ -128,14 +128,15 @@ def profile(request):
     except django.core.exceptions.ObjectDoesNotExist:
         raise Exception("User does not exist")
 
-    sent_mails = Mail.objects.raw('SELECT mail FROM Mail WHERE user.id == mail.sender_id;')
+    sent_mails = Mail.objects.raw('SELECT mail FROM Mail JOIN mailAddress ON mailAdress.user_id = user.id AND mailAdress.id = mail.sender_id;')
     mean_response_time = 0
     n=0
 
     for current_mail in sent_mails:
         if current_mail.reponse:
             try:
-                previous_mail = Mail.objects.raw('SELECT mail FROM Mail WHERE current_mail.sender_id == mail.recipient_id, mail.date < current_mail.date ORDER BY Mail.date LIMIT 1;')
+                previous_mail = Mail.objects.raw("""SELECT mail FROM Mail WHERE current_mail.sender_id == mail.recipient_id, mail.date < current_mail.date 
+                                                    ORDER BY Mail.date DESC LIMIT 1;""")
             except django.core.exceptions.ObjectDoesNotExist:
                 previous_mail = None
 
@@ -146,13 +147,16 @@ def profile(request):
     if n!=0:
         mean_response_time /= n
 
-    number_of_internal_mails = 0
+    number_of_internal_mails = Mail.objects.raw("""SELECT mail COUNT(*) FROM Mail JOIN app_user 
+                                                ON app_user.inEnron=1, 
+                                                                                                        """)
     number_of_external_mails = 0
 
     internal_contacts = User.objects.raw()
 
     context = {
-        'mean_response_time' = mean_response_time
+        'user':user,
+        'mean_response_time': mean_response_time
         }
 
-    return render(request, 'profile.html', context)
+    return render(request, 'profile_enron.html', context)
