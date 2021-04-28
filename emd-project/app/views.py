@@ -135,11 +135,11 @@ def profile(request):
     internal_contacts = []
     daily_mails = defaultdict(lambda: 0)
 
-    for mail in mails:
+    for current_mail in mails:
         #2000-12-04 10:09:00+00:00
-        daily_mails[str(mail.date)[:10]]+=1
-        sender=User.objects.get(id=mail.sender_id)
-        recipient=User.objects.get(id=mail.recipient_id)
+        daily_mails[str(current_mail.date)[:10]]+=1
+        sender=User.objects.get(id=current_mail.sender_id)
+        recipient=User.objects.get(id=current_mail.recipient_id)
 
         if sender.name == user.name:
             if recipient.inEnron:
@@ -148,16 +148,16 @@ def profile(request):
             else:
                 number_of_external_mails+=1
 
-            if mail.isReply:
+            if current_mail.isReply:
                 try:
-                    previous_mail = Mail.objects.raw("""SELECT mail FROM app_Mail WHERE current_mail.sender_id = mail.recipient_id, mail.date < current_mail.date 
+                    previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_Mail WHERE mail.recipient_id={current_mail.sender_id}, mail.date < {current_mail.date} 
                                                         ORDER BY app_Mail.date DESC LIMIT 1;""")
                 except django.core.exceptions.ObjectDoesNotExist:
                     previous_mail = None
 
                 if previous_mail is not None:
                     number_of_responses+=1
-                    mean_response_time += (mail.date - previous_mail.date).total_seconds()
+                    mean_response_time += (current_mail.date - previous_mail.date).total_seconds()
 
         else:
             if sender.inEnron:
