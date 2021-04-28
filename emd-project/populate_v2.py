@@ -160,9 +160,9 @@ def catch_infos(mail):
     recipient_field = ['To', 'X-To', 'Cc', 'X-cc', 'Bcc', 'X-bcc']
     for field in recipient_field:
         try:
-            mail_recipients += re.split(',', re.sub(r"\s+", "", mail['To'])) #flags=re.UNICODE))
+            mail_recipients += re.split(',', re.sub(r"\s+", "", mail[field])) #flags=re.UNICODE))
         except KeyError: pass
-    # remove recipients without '@''
+    # remove recipients without '@'
     regex = re.compile(r'.*@.*')
     mail_recipients = [elm for elm in mail_recipients if regex.match(elm)]
     # remove duplicate recipients
