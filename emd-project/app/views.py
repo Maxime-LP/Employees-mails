@@ -2,6 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+import django
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
@@ -118,4 +119,40 @@ def days(request):
 
 @login_required(login_url="/login/")
 def profile(request):
-    pass
+
+    user = request.GET.get('user')
+    if not user:
+        raise Exception("Please enter a name")
+    try:
+        user = User.objects.get(name = user)
+    except django.core.exceptions.ObjectDoesNotExist:
+        raise Exception("User does not exist")
+
+    sent_mails = Mail.objects.raw('SELECT mail FROM Mail WHERE user.id == mail.sender_id;')
+    mean_response_time = 0
+    n=0
+
+    for current_mail in sent_mails:
+        if current_mail.reponse:
+            try:
+                previous_mail = Mail.objects.raw('SELECT mail FROM Mail WHERE current_mail.sender_id == mail.recipient_id, mail.date < current_mail.date ORDER BY Mail.date LIMIT 1;')
+            except django.core.exceptions.ObjectDoesNotExist:
+                previous_mail = None
+
+            if previous_mail is not None:
+                n+=1
+                mean_response_time += current_mail.date - previous_mail.date #??
+    
+    if n!=0:
+        mean_response_time /= n
+
+    number_of_internal_mails = 0
+    number_of_external_mails = 0
+
+    internal_contacts = User.objects.raw()
+
+    context = {
+        'mean_response_time' = mean_response_time
+        }
+
+    return render(request, 'profile.html', context)
