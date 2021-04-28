@@ -141,9 +141,9 @@ def profile(request):
     if n!=0:
         mean_response_time /= n
 
-    number_of_internal_mails = Mail.objects.raw("""SELECT mail COUNT(*) FROM Mail JOIN app_user 
-                                                ON app_user.inEnron=1, 
-                                                                                                        """)
+    number_of_internal_mails = Mail.objects.raw(f"""SELECT mail FROM app_Mail JOIN app_mailAddress ON app_mailAdress.user_id = {user.id} 
+                                                    AND (app_mailAdress.id = mail.sender_id OR app_mailAdress.id = mail.recipient_id)
+                                                                                                        ;""")
     number_of_external_mails = 0
 
     internal_contacts = User.objects.raw()
