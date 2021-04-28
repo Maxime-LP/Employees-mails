@@ -8,7 +8,7 @@ from time import time
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
-from django.utils.timezone import datetime, timedelta, make_aware, timezone
+from django.utils.timezone import datetime, timezone
 from app.models import Mailbox, mailAddress, Mail, User
 import xml.etree.ElementTree as ET
 from collections import defaultdict

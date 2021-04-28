@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django import template
 from app.models import User, Mailbox, mailAddress, Mail
 from collections import defaultdict
+from django.utils.timezone import datetime
 import numpy as np
 
 def index(request):
@@ -135,7 +136,8 @@ def profile(request):
     daily_mails = defaultdict(lambda: 0)
 
     for mail in mails:
-        daily_mails[mail.date]+=1
+        #2000-12-04 10:09:00+00:00
+        daily_mails[str(mail.date)[:10]]+=1
         sender=User.objects.get(id=mail.sender_id)
         recipient=User.objects.get(id=mail.recipient_id)
 
