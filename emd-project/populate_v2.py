@@ -23,8 +23,7 @@ def preprocessXMLFile():
 
     for child in root:
         current_mailbox = Mailbox()
-        current_user = User()
-        current_user.inEnron = True
+        current_user = User(inEnron = True)
         current_user.save()
         current_mailbox.save()
         
@@ -44,10 +43,7 @@ def preprocessXMLFile():
                 first_name = subchild.text
 
             elif subchild.tag == 'email':
-                new_mail = mailAddress()
-                new_mail.box_id = current_mailbox.id
-                new_mail.address = subchild.attrib['address']
-                new_mail.user_id = current_user.id
+                new_mail = mailAddress(box_id = current_mailbox.id, address = subchild.attrib['address'], user_id = current_user.id)
                 new_mail.save()
             
             elif subchild.tag == 'mailbox':
@@ -76,7 +72,7 @@ def get_most_recent_mail(list_of_mails):
     """
     Input must be a list of mail instances or an instance of mail
     """
-    if isinstance(list_of_mails,mail):
+    if isinstance(list_of_mails,Mail):
         return list_of_mails
     return max(list_of_mails, key=lambda x: x.date)
 
@@ -116,12 +112,12 @@ def create_pickle(data_fp, name):
                 emails[mail_id]['fp'] = fp
 
 
-    print(f'Completed: {n} files has been read in {round(time()-t0,2)}s.')
+    print(f'Completed: {n} files have been read in {round(time()-t0,2)}s.')
 
     print('Create pickle: ...', end="\r")
     with open(os.path.join(name), "wb") as data:
         pickle.dump(emails, data)
-    print(f'Create pickle: succeeds. {len(emails)} emails has been read.')
+    print(f'Create pickle: succeeds. {len(emails)} emails have been read.')
 
     return os.path.join(name)
 
@@ -130,7 +126,7 @@ def load_data(pickle_fp):
     print('Load data: ...', end='\r')
     with open(pickle_fp, "rb") as data:
         emails = pickle.load(data)
-    print(f'Load data: succeeds. {len(emails)} emails has been load.')
+    print(f'Load data: succeeds. {len(emails)} emails have been loaded.')
     return emails
 
 
