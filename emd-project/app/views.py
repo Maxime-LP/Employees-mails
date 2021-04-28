@@ -150,7 +150,8 @@ def profile(request):
 
             if current_mail.isReply:
                 try:
-                    previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_Mail WHERE mail.recipient_id={current_mail.sender_id}, mail.date < {current_mail.date} 
+                    previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_Mail WHERE mail.sender_id = {current_mail.recipient_id} AND 
+                                                        mail.recipient_id={current_mail.sender_id} AND mail.date < {current_mail.date} 
                                                         ORDER BY app_Mail.date DESC LIMIT 1;""")
                 except django.core.exceptions.ObjectDoesNotExist:
                     previous_mail = None
