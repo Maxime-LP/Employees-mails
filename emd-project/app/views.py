@@ -113,7 +113,32 @@ def couples(request):
     pass
 
 def days(request):
-    pass
+
+    start_date = request.GET.get('start_date')
+    if not start_date:
+        start_date = 0
+    else:
+        pass
+
+    end_date = request.GET.get('end_date')
+    if not end_date:
+        end_date=None
+    else:
+        pass
+
+    threshold = request.GET.get('threshold')
+    if not threshold:
+        threshold = 10
+    else:
+        threshold = int(threshold)
+    
+    mails_per_day = Mail.objects.raw(f"""SELECT DATE(app_Mail.date), mail, COUNT(mail) AS mail_count FROM app_Mail WHERE app_Mail.date > {start_date} AND app_Mail.date < {end_date} 
+                                    GROUP BY DATE(app_Mail.date) ORDER BY mail_count DESC;""")
+
+    context = {
+        }
+
+    return render(request, 'days.html', context)
 
 def profile(request):
 
