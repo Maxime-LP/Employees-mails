@@ -90,8 +90,6 @@ def employees(request):
         'start_date':start_date,
         'end_date':end_date,
         'lines':lines,
-
-
         }
 
     load_template = request.path.split('/')[-1]
@@ -110,7 +108,39 @@ def employees(request):
     """
 
 def couples(request):
-    pass
+    
+    start_date = request.GET.get('start_date')
+    if not start_date:
+        start_date = 0
+    else:
+        print(start_date)
+
+    end_date = request.GET.get('end_date')
+    if not end_date:
+        pass
+    else:
+        pass
+
+    threshold = request.GET.get('threshold')
+    if not threshold:
+        threshold = 10
+    else:
+        threshold = int(threshold)
+
+    lines = request.GET.get('lines')
+    if not lines:
+        lines = 10
+    else:
+        lines = int(lines)
+
+    couples = User.objects.raw(f"""SELECT app_user.user1 as user1, app_user.user2 as user2, app_mail.mail, COUNT(app_mail.mail) as count FROM app_mail JOIN app_mailAddress
+                                ON app_mailAddress.user_id = user1.id""")
+
+    context = {
+    
+        }
+
+    return render(request, 'couples.html', context)
 
 def days(request):
 
