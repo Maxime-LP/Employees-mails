@@ -24,11 +24,11 @@ class mailAddress(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.address}, {self.box}, {self.user.name}"
+        return f"{self.address}, {self.user.name}"
 
 
 class Mail(models.Model):
-    enron_id = models.CharField(max_length=120, primary_key=True)
+    enron_id = models.CharField(max_length=120)
     date = models.DateTimeField(null=True)
     subject = models.CharField(max_length=200,null=True)
     sender = models.ForeignKey(mailAddress,null=True,on_delete=models.CASCADE,related_name='sender')

@@ -9,7 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
 from django.http import HttpResponse
 from django import template
-from app.models import User, Mailbox, mailAddress, Mail
+from app.models import User, mailAddress, Mail
 from collections import defaultdict
 from django.utils.timezone import datetime
 import numpy as np

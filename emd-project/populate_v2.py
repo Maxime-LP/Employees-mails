@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
 from django.utils.timezone import datetime, timezone
-from app.models import Mailbox, mailAddress, Mail, User
+from app.models import mailAddress, Mail, User
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
@@ -22,10 +22,10 @@ def preprocessXMLFile():
     root = tree.getroot()
 
     for child in root:
-        current_mailbox = Mailbox()
+        #current_mailbox = Mailbox()
         current_user = User(inEnron = True)
         current_user.save()
-        current_mailbox.save()
+        #current_mailbox.save()
         
         last_name = ''
         first_name = ''
@@ -43,14 +43,14 @@ def preprocessXMLFile():
                 first_name = subchild.text
 
             elif subchild.tag == 'email':
-                new_mail = mailAddress(box_id = current_mailbox.id, address = subchild.attrib['address'], user_id = current_user.id)
+                new_mail = mailAddress(address = subchild.attrib['address'], user = current_user)
                 new_mail.save()
             
-            elif subchild.tag == 'mailbox':
-                current_mailbox.tag = subchild.text
+            #elif subchild.tag == 'mailbox':
+            #    current_mailbox.tag = subchild.text
         
         current_user.name = f"{first_name} {last_name}"
-        current_mailbox.save()
+        #current_mailbox.save()
         current_user.save()
 
 
@@ -67,7 +67,7 @@ def convert_date(input_date):
     UTC = timezone(timedelta(hours = 0))
     converted_date = converted_date.astimezone(UTC)
     return converted_date
-
+'''
 def get_most_recent_mail(list_of_mails):
     """
     Input must be a list of mail instances or an instance of mail
@@ -82,6 +82,26 @@ def PasDeDoublon(list: list ):
         if element not in new_list:
             new_list.append(element)
     return new_list
+'''
+
+def get_name(mail_address):
+    regex = re.compile(r'([a-zA-Z]*\.[a-zA-Z]*)@.*\.com')
+    found = regex.search(mail_address)
+    if found:
+        name = str.title(re.sub('\.', ' ',found.group(1)))
+    else:
+        name = 'Unknown'
+    return name
+
+def inEnron(mail_address):
+    regex = re.compile(r'.*@enron\..*')
+    found = regex.search(mail_address)
+    return found
+
+def isReply(mail_subject):
+    regex = re.compile(r'^Re')
+    found = regex.search(mail_subject)
+    return found
 
 def progress_info(n, prefix="Computing:", size=40, file=sys.stdout):
     if n%100 == 0:
@@ -168,45 +188,60 @@ def catch_infos(mail):
 
 
 def update_db(infos):
-    mail_id, mail_date, mail_subject, mail_sender, mail_recipients = infos
-    pass
-    '''
-    print(type(mail_id))
-    print(mail_id)
-    print(mail_sender)
-    input('pass')
-    # save mail
-    regex = re.compile(r'Re:')
-    mail_isReply = bool(regex.match(mail_subject))
-    mail = Mail(enron_id = mail_id,
-                date = mail_date,
-                subject = mail_subject,
-                sender = mail_sender,
-                recipient = mail_recipients,
-                isReply = mail_isReply
-                )
-    #mail.save()
-    '''
+    
+    mail_id, mail_date, mail_subject, sender_address, recipients_address = infos
+    
+    try:
+       
+        sender = mailAddress.objects.get(address=sender_address).user
+    
+    except django.core.exceptions.ObjectDoesNotExist:
+        
+        sender = User(name=get_name(sender_address),
+                      inEnron=inEnron(sender_address),
+                      category='Unknown')
+        sender_mail_address = mailAddress(address=sender_address,
+                                    user=sender)
+        #sender_mail_address.save()
+        #sender.save()
+    
 
-def update_database(emails):
-    n = 1
-    for mail in emails.values():
-        infos = catch_infos(mail)
-        update_db(infos)
-        n = progress_info(n, prefix='Updating database:')
-    print('Update database: succeeds.')
+    for recipient_address in recipients_address:
 
+        try:
+       
+            recipient = mailAddress.objects.get(address=recipient_address)
+        
+        except django.core.exceptions.ObjectDoesNotExist:
+            
+            recipient = User(name=get_name(recipient_address),
+                          inEnron=inEnron(recipient_address),
+                          category='Unknown')
+            recipient_mail_address = mailAddress(address=recipient_address,
+                                    user=recipient)
+
+            #recipient_mail_address.save()
+            #recipient.save()
+
+        mail = Mail(enron_id = mail_id,
+                    date=mail_date,
+                    subject=mail_subject,
+                    sender=sender,
+                    recipient=recipient,
+                    isReply=isReply(mail_subject))
+        #mail.save()
+    
 
 if __name__=="__main__":
 
-    x = input('Proprocess XML file (0/1)? ')
+    x = 0 # input('Proprocess XML file (0/1)? ')
     if bool(int(x)):
         preprocessXMLFile()
     
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
 
-    x =  input('Create pickle file (0/1)? ')
+    x = 0 # input('Create pickle file (0/1)? ')
     if bool(int(x)):
         pkl_fp = create_pickle(data_fp, name=pkl_file_name)
     else:
@@ -214,5 +249,11 @@ if __name__=="__main__":
 
     emails = load_data(pickle_fp=pkl_fp)
 
-    update_database(emails)
+    n = 1
+    for mail in emails.values():
+        infos = catch_infos(mail)
+        update_db(infos)
+        n = progress_info(n, prefix='Updating database:')
+    
+    print('Update database: succeeds.')
     
