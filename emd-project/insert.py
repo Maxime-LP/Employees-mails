@@ -12,6 +12,8 @@ from django.utils.timezone import datetime, timezone, timedelta
 from app.models import mailAddress, Mail, User
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from multiprocessing import Pool
+from tqdm import tqdm
 
 
 ## Preprocessing employes_enron.xml ##########################################
@@ -62,19 +64,20 @@ def convert(date):
     return converted_date
 
 def get_name(mail_address):
-    regex1 = re.compile(r'([a-zA-Z]*\.[a-zA-Z]*)@.*\.com')
+    
+    #print('=> ',mail_address)
+    regex1 = re.compile(r'([a-zA-Z]*[\._-][a-zA-Z]*)@.*\..{,3}')
     found = regex1.search(mail_address)
     if found:
-        name = str.title(re.sub('\.', ' ',found.group(1)))
-    else:
-        try:
-            regex2 = re.compile(r'^<?(.*)@$')
-            found = regex2.search(mail_address)
-            name = found.group(1)
-        except AttributeError:
-            name = None
-            #print(mail_address)
-    return name
+        return str.title(re.sub(r'[\._-]', ' ',found.group(1))).strip()
+    
+    regex2 = re.compile(r'^<?(.*)@.*>$')
+    found = regex2.search(mail_address)
+    if found:
+        return str.title(found.group(1)).strip()
+
+    #print(None)
+    return None
 
 def inEnron(mail_address):
     regex = re.compile(r'.*@enron\..*')
@@ -182,79 +185,84 @@ def update_db(infos):
     mail_id, mail_date, mail_subject, sender_address, recipients_address = infos
 
     try:
-
-        mail = Mail.objects.get(enron_id=mail_id)
-    
+        sender_address_ = mailAddress.objects.get(address=sender_address)
     except django.core.exceptions.ObjectDoesNotExist:
-        
         try:
-            sender_address_ = mailAddress.objects.get(address=sender_address)
+            sender_ = User.objects.get(name=get_name(sender_address))
+        except:
+            sender_ = User(name=get_name(sender_address),
+                          inEnron=inEnron(sender_address),
+                          category='Unknown')
+            sender_.save()
+        sender_address_ = mailAddress(address=sender_address,
+                                    user=sender_)
+        sender_address_.save()
+
+    for recipient_address in recipients_address:
+        try:
+            recipient_address_ = mailAddress.objects.get(address=recipient_address)
         except django.core.exceptions.ObjectDoesNotExist:
             try:
-                sender_ = User.objects.get(name=get_name(sender_address))
+                recipient_address_ = User.objects.get(name=get_name(recipient_address))
+                recipient_ = recipient_address_.user
             except:
-                sender_ = User(name=get_name(sender_address),
-                              inEnron=inEnron(sender_address),
-                              category='Employee')
-                sender_.save()
+                recipient_ = User(name=get_name(recipient_address),
+                              inEnron=inEnron(recipient_address),
+                              category='Unknown')
+                recipient_.save()
 
-            sender_address_ = mailAddress(address=sender_address,
-                                        user=sender_)
-            sender_address_.save()
+            recipient_address_ = mailAddress(address=recipient_address,
+                                        user=recipient_)
+            recipient_address_.save()
+        
+        mail_ = Mail(enron_id=mail_id,
+                    date=mail_date,
+                    subject=mail_subject,
+                    sender=sender_address_,
+                    recipient=recipient_address_,
+                    isReply=isReply(mail_subject))
+        mail_.save()
 
-        for recipient_address in recipients_address:
-            try:
-                recipient_address_ = mailAddress.objects.get(address=recipient_address)
-            except django.core.exceptions.ObjectDoesNotExist:
-                try:
-                    recipient_address_ = User.objects.get(name=get_name(recipient_address))
-                    recipient_ = recipient_address_.user
-                except:
-                    recipient_ = User(name=get_name(recipient_address),
-                                  inEnron=inEnron(recipient_address),
-                                  category='Unknown')
-                    recipient_.save()
 
-                recipient_address_ = mailAddress(address=recipient_address,
-                                            user=recipient_)
-                recipient_address_.save()
-            
-            mail_ = Mail(enron_id=mail_id,
-                        date=mail_date,
-                        subject=mail_subject,
-                        sender=sender_address_,
-                        recipient=recipient_address_,
-                        isReply=isReply(mail_subject))
-            mail_.save()
-    
+def update(email):
+    try:
+        email_id = email['Message-ID']
+        mail = Mail.objects.get(enron_id=email_id)
+    except django.core.exceptions.ObjectDoesNotExist:
+        infos = catch_infos(email)
+        update_db(infos)
+
 
 if __name__=="__main__":
 
-    try:
+    data_fp = '/home/amait/Downloads/maildir'
+    pkl_file_name = 'headers.pkl'
+    
+    x = input('Proprocess XML file (0/1)? ')
+    if x == '1':
+        preprocessXMLFile()
+    
+    x = 0#input('Create pickle file (0/1)? ')
+    if x == '1':
+        pkl_fp = create_pickle(data_fp, name=pkl_file_name)
+    else:
+        pkl_fp = os.path.join(pkl_file_name)
 
-        x = input('Proprocess XML file (0/1)? ')
-        if bool(int(x)):
-            preprocessXMLFile()
-        
-        data_fp = '/home/amait/Downloads/maildir'
-        pkl_file_name = 'headers.pkl'
-
-        x = input('Create pickle file (0/1)? ')
-        if bool(int(x)):
-            pkl_fp = create_pickle(data_fp, name=pkl_file_name)
-        else:
-            pkl_fp = os.path.join(pkl_file_name)
-
-        x = input('Update database (0/1)? ')
-        if bool(int(x)):
-            emails = load_data(pickle_fp=pkl_fp)
-            n = 1
-            for email in emails.values():
+    x = '1'#input('Update database (0/1)? ')
+    if x == '1':
+        emails = load_data(pickle_fp=pkl_fp)
+        '''
+        with Pool(processes=os.cpu_count()) as p:
+            res = list(tqdm(p.imap(update, emails.values()), total=len(emails), leave=False))
+        '''
+        n = 1
+        for email in emails.values():
+            try:
+                email_id = email['Message-ID']
+                mail = Mail.objects.get(enron_id=email_id)
+            except django.core.exceptions.ObjectDoesNotExist:
                 infos = catch_infos(email)
                 update_db(infos)
-                n = progress_info(n, prefix='Updating database:')
-            
-            print('Update database: succeeds.')
-
-    except ValueError:
-        print('Incorrect answer. Choose between "0" and "1".')
+            n = progress_info(n, prefix='Updating database:')
+        
+        print('Update database: succeeds.')

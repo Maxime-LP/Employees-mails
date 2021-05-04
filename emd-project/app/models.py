@@ -10,7 +10,7 @@ from django.db import models
 #modèle 2
 class User(models.Model):
   
-    name = models.CharField(null=True, max_length=100)
+    name = models.CharField(null=True, max_length=200)
     inEnron = models.BooleanField(null=False)
     category = models.CharField(null=True, max_length=40)
 
@@ -24,7 +24,7 @@ class mailAddress(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.id}, {self.address}, {self.user.name}"
+        return f"{self.address}, {self.user.name}"
 
 
 class Mail(models.Model):
