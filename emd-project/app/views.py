@@ -180,9 +180,11 @@ def profile(request):
     except django.core.exceptions.ObjectDoesNotExist:
         raise Exception("User does not exist")
     
-
-    mails = Mail.objects.raw(f"""SELECT mail, COUNT(*) FROM app_Mail JOIN app_mailAddress ON app_mailAdress.user_id = {user.id} 
-                                    AND (app_mailAddress.id = mail.sender_id OR app_mailAdress.id = mail.recipient_id);""")
+    mails = Mail.objects.raw(f'''SELECT *
+                                FROM app_Mail 
+                                    JOIN app_mailAddress
+                                        ON app_mailAddress.user_id = {user.id}
+                                        AND ('app_mailAddress'.id = 'app_Mail'.sender_id OR 'app_mailAddress'.id = 'app_Mail'.recipient_id);''')
     mean_response_time = 0
     number_of_responses = 0
     number_of_internal_mails = 0
