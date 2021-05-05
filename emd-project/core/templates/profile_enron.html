@@ -50,6 +50,7 @@
         </div>
       </div>
 
+      {% if user != -1 %}
       <div class="row mt-4">
         <div class="col">
           <div class="card shadow">
@@ -63,14 +64,17 @@
                   {% if mean_response_time != 0%}
                     <tr> <td>temps de reponse moyen : {{ mean_response_time }}</td> </tr>
                   {% endif %}
-                  <tr> <td>Nombre moyen de mails envoyés et reçus par jour : {{ daily_mean }}</td> </tr>
+                  <tr> <td>Nombre moyen de mails envoyés ou reçus par jour : {{ daily_mean }}</td> </tr>
+                  {% if internal_contacts != 0%}
                   <tr> <td>Contacts internes : {{ internal_contacts }}</td> </tr>
+                  {% endif %}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
+      {% endif %}
 
       {% include "includes/footer.html" %}
     </div>

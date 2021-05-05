@@ -174,7 +174,13 @@ def profile(request):
 
     user = request.GET.get('user')
     if not user:
-        raise Exception("Please enter a name")
+        return render(request, 'profile_enron.html', {
+                        'user':-1,
+                        'daily_mean':0,
+                        'mean_response_time': 0,
+                        'ratio':0,
+                        'internal_contacts':[]
+                                })
     try:
         user = User.objects.get(name = user)
     except django.core.exceptions.ObjectDoesNotExist:
@@ -222,8 +228,10 @@ def profile(request):
                 number_of_internal_mails+=1
             else:
                 number_of_external_mails+=1
-    
-    #internal_contacts = set(internal_contacts)
+    if internal_contacts == []:
+        internal_contacts = 0
+    else:
+        internal_contacts = set(internal_contacts)
         
     if number_of_responses!=0:
         mean_response_time /= number_of_responses
