@@ -180,18 +180,18 @@ def profile(request):
     except django.core.exceptions.ObjectDoesNotExist:
         raise Exception("User does not exist")
     
-    mails = Mail.objects.raw(f'''SELECT *
+    mails = Mail.objects.raw(f'''SELECT app_Mail.*
                                 FROM app_Mail 
-                                    JOIN app_mailAddress
-                                        ON app_mailAddress.user_id = {user.id}
-                                        AND ('app_mailAddress'.id = 'app_Mail'.sender_id OR 'app_mailAddress'.id = 'app_Mail'.recipient_id);''')
+                                JOIN app_mailAddress
+                                    ON app_mailAddress.user_id = {user.id}
+                                WHERE (app_mailAddress.id = app_Mail.sender_id OR app_mailAddress.id = app_Mail.recipient_id);''')
     mean_response_time = 0
     number_of_responses = 0
     number_of_internal_mails = 0
     number_of_external_mails = 0
     internal_contacts = []
     daily_mails = defaultdict(lambda: 0)
-
+    
     for current_mail in mails:
         #2000-12-04 10:09:00+00:00
         daily_mails[str(current_mail.date)[:10]]+=1
@@ -223,7 +223,7 @@ def profile(request):
             else:
                 number_of_external_mails+=1
     
-    internal_contacts = set(internal_contacts)
+    #internal_contacts = set(internal_contacts)
         
     if number_of_responses!=0:
         mean_response_time /= number_of_responses
