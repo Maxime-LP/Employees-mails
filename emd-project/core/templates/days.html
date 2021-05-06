@@ -1,6 +1,6 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Profile {% endblock title %}
+{% block title %} Days {% endblock title %}
 
 {% block content %}
 
@@ -20,7 +20,7 @@
       <div class="row">
         <div class="col">
           <div class="card bg-secondary shadow">
-            <form action="/profile" method="get">
+            <form action="/days" method="get">
               <div class="card-header bg-white border-0">
                 <div class="row align-items-center">
                   <div class="col-8">
@@ -36,12 +36,24 @@
                   <div class="row">
                     <div class="col-lg-2">
                       <div class="form-group">
-                        <label class="form-control-label" for="user">Username</label>
-                        <input type="text" id="user" class="form-control form-control-alternative"
-                        name="user" value="{{user.name}}">
+                        <label class="form-control-label" for="start_date">Start date</label>
+                        <input type="date" id="start_date" class="form-control form-control-alternative"
+                        name="start_date" value="{{ start_date }}">
                       </div>
                     </div>
-
+                    <div class="col-lg-2">
+                      <div class="form-group">
+                        <label class="form-control-label" for="end_date">End date</label>
+                        <input type="date" id="end_date" class="form-control form-control-alternative" name="end_date" value="{{ end_date }}">
+                      </div>
+                    </div>
+                    <div class="col-lg-2">
+                      <div class="form-group">
+                        <label class="form-control-label" for="low_thr">Threshold</label>
+                        <input type="text" id="low_thr" class="form-control form-control-alternative" name="thr" 
+                        value="{{ threshold }}" placeholder="">
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -50,35 +62,32 @@
         </div>
       </div>
 
-      {% if user != -1 %}
       <div class="row mt-4">
         <div class="col">
           <div class="card shadow">
             <div class="card-header border-0">
-              <h3 class="mt-0">Profile of {{user.name}}</h3>
+              <h3 class="mt-0">Jours avec le plus d'échanges de mails</h3>
             </div>
             <div class="table-responsive">
               <table class="table align-items-center table-flush">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">Days</th>
+                    <th> </th>
+                  </tr>
+                </thead>
                 <tbody>
-                  <tr> <td>Catégorie : {{ user.category }}</td> </tr>
-                  <tr> <td>Nombre moyen de mails envoyés par jour : {{ daily_sent_mails_mean }}</td> </tr>
-                  <tr> <td>Nombre moyen de mails reçus par jour : {{ daily_received_mails_mean }}</td> </tr>
-                  <tr> <td>I/E ratio : {{ ratio }}</td> </tr>
-
-                  {% if mean_response_time != 0%}
-                  <tr> <td>Temps de reponse moyen : {{ mean_response_time }}</td> </tr>
-                  {% endif %}
-                  
-                  {% if internal_contacts != 0%}
-                  <tr> <td>Contacts internes : {{ internal_contacts }}</td> </tr>
-                  {% endif %}
+                  {% for day in days %}
+                  <tr>
+                    <td> {{ day.date }} : {{ day.dcount }} </td>
+                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
-      {% endif %}
 
       {% include "includes/footer.html" %}
     </div>

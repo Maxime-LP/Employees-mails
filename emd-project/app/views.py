@@ -10,6 +10,7 @@ from django.template import loader
 from django.http import HttpResponse
 from django import template
 from app.models import User, mailAddress, Mail
+from django.db.models import Count
 from collections import defaultdict
 from django.utils.timezone import datetime
 import numpy as np
@@ -146,26 +147,31 @@ def days(request):
 
     start_date = request.GET.get('start_date')
     if not start_date:
-        start_date = 0
-    else:
-        pass
+        start_date = datetime(1900,1,1)
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        end_date=None
-    else:
-        pass
-
+        end_date=datetime(2100,1,1)
+    
     threshold = request.GET.get('threshold')
     if not threshold:
         threshold = 10
     else:
         threshold = int(threshold)
+
+        #WHERE CAST(app_Mail.date AS DATE) >= CAST({start_date} AS DATE)
+        #                                AND app_Mail.date < DATE({end_date})
     
-    mails_per_day = Mail.objects.raw(f"""SELECT DATE(app_Mail.date), mail, COUNT(mail) AS mail_count FROM app_Mail WHERE app_Mail.date > {start_date} AND app_Mail.date < {end_date} 
-                                    GROUP BY DATE(app_Mail.date) ORDER BY mail_count DESC;""")
+    #mails_per_day = Mail.objects.raw(f"""SELECT app_Mail.date, COUNT(app_Mail.date) AS mail_count FROM app_Mail
+    #                                    GROUP BY app_Mail.date ORDER BY mail_count DESC;""")
+
+    mails_per_day = Mail.objects.values('date').filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount')
 
     context = {
+        "days":mails_per_day,
+        'start_date':start_date,
+        'end_date':end_date,
+        'threshold':threshold
         }
 
     return render(request, 'days.html', context)
@@ -176,7 +182,8 @@ def profile(request):
     if not user:
         return render(request, 'profile_enron.html', {
                         'user':-1,
-                        'daily_mean':0,
+                        'daily_sent_mails_mean':0,
+                        'daily_received_mails_mean':0,
                         'mean_response_time': 0,
                         'ratio':0,
                         'internal_contacts':[]
@@ -196,15 +203,16 @@ def profile(request):
     number_of_internal_mails = 0
     number_of_external_mails = 0
     internal_contacts = []
-    daily_mails = defaultdict(lambda: 0)
+    daily_sent_mails = defaultdict(lambda: 0)
+    daily_received_mails = defaultdict(lambda: 0)
     
     for current_mail in mails:
         #2000-12-04 10:09:00+00:00
-        daily_mails[str(current_mail.date)[:10]]+=1
         sender=User.objects.get(id=current_mail.sender_id)
         recipient=User.objects.get(id=current_mail.recipient_id)
 
         if sender.name == user.name:
+            daily_sent_mails[str(current_mail.date)[:10]]+=1
             if recipient.inEnron:
                 number_of_internal_mails+=1
                 internal_contacts.append(recipient.name)
@@ -224,6 +232,7 @@ def profile(request):
                     mean_response_time += (current_mail.date - previous_mail.date).total_seconds()
 
         else:
+            daily_received_mails[str(current_mail.date)[:10]]+=1
             if sender.inEnron:
                 number_of_internal_mails+=1
             else:
@@ -243,7 +252,8 @@ def profile(request):
     
     context = {
         'user':user,
-        'daily_mean':np.mean(list(daily_mails.values())),
+        'daily_sent_mails_mean':np.mean(list(daily_sent_mails.values())),
+        'daily_received_mails_mean':np.mean(list(daily_received_mails.values())),
         'mean_response_time': mean_response_time,
         'ratio':ratio,
         'internal_contacts':internal_contacts
