@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django import template
 from app.models import User, mailAddress, Mail
 from django.db.models import Count
+from django.db.models.functions import TruncDate
 from collections import defaultdict
 from django.utils.timezone import datetime
 import numpy as np
@@ -159,13 +160,7 @@ def days(request):
     else:
         threshold = int(threshold)
 
-        #WHERE CAST(app_Mail.date AS DATE) >= CAST({start_date} AS DATE)
-        #                                AND app_Mail.date < DATE({end_date})
-    
-    #mails_per_day = Mail.objects.raw(f"""SELECT app_Mail.date, COUNT(app_Mail.date) AS mail_count FROM app_Mail
-    #                                    GROUP BY app_Mail.date ORDER BY mail_count DESC;""")
-
-    mails_per_day = Mail.objects.values('date').filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount')
+    mails_per_day = Mail.objects.annotate(time=TruncDate('date')).values('time').filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount')
 
     context = {
         "days":mails_per_day,
