@@ -188,10 +188,6 @@ def catch_infos(email):
 def update_db(infos):
     
     mail_id, mail_date, mail_subject, sender_address, recipients_address = infos
-
-    get_name(sender_address)
-    for r in recipients_address:
-        get_name(r)
     
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
@@ -204,7 +200,10 @@ def update_db(infos):
                           category='Unknown')
             sender_.save()
         sender_address_ = mailAddress(address=sender_address, user=sender_)
-        sender_address_.save()
+        try:
+            sender_address_.save()
+        except django.db.utils.DataError:
+            print(mail_id, ':', sender_address)
 
     for recipient_address in recipients_address:
         try:
@@ -217,7 +216,10 @@ def update_db(infos):
                 recipient_ = User(name=get_name(recipient_address),
                               inEnron=inEnron(recipient_address),
                               category='Unknown')
-                recipient_.save()
+                try:
+                    recipient_.save()
+                except django.db.utils.DataError:
+                    print(mail_id, ':', recipient_address)
 
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
             recipient_address_.save()
@@ -228,7 +230,10 @@ def update_db(infos):
                     sender=sender_address_,
                     recipient=recipient_address_,
                     isReply=isReply(mail_subject))
-        mail_.save()
+        try:
+            mail_.save()
+        except django.db.utils.DataError:
+            print(mail_id)
 
 '''
 def update(email):
