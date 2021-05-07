@@ -154,13 +154,14 @@ def days(request):
     if not end_date:
         end_date=datetime(2100,1,1)
     
-    threshold = request.GET.get('threshold')
+    threshold = request.GET.get('thr')
     if not threshold:
         threshold = 10
     else:
         threshold = int(threshold)
 
-    mails_per_day = Mail.objects.annotate(time=TruncDate('date')).values('time').filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount')
+    mails_per_day = Mail.objects.annotate(time=TruncDate('date')).values('time')\
+                    .filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=threshold)
 
     context = {
         "days":mails_per_day,
