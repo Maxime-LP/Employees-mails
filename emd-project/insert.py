@@ -65,7 +65,8 @@ def convert(date):
 
 def get_name(mail_address):
     
-    #print('=> ',mail_address)
+    mail_address = re.sub(r'[\'\"]', "", mail_address)
+
     regex1 = re.compile(r'([a-zA-Z]*[\._-][a-zA-Z]*)@.*\..{,3}')
     found = regex1.search(mail_address)
     if found:
@@ -75,12 +76,16 @@ def get_name(mail_address):
     found = regex2.search(mail_address)
     if found:
         return str.title(found.group(1)).strip()
+    
+    regex3 = re.compile(r'^([A-Za-z]*)@')
+    found = regex3.search(mail_address)
+    if found:
+        return re.sub(r"([A-Z])", r" \1", found.group(1)).strip()
 
-    #print(None)
-    return None
+    return mail_address
 
 def inEnron(mail_address):
-    regex = re.compile(r'.*@enron\..*')
+    regex = re.compile(r'.*@enron\..*', re.IGNORECASE)
     found = regex.search(mail_address)
     return False if found==None else True
 
@@ -184,6 +189,10 @@ def update_db(infos):
     
     mail_id, mail_date, mail_subject, sender_address, recipients_address = infos
 
+    get_name(sender_address)
+    for r in recipients_address:
+        get_name(r)
+    
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
     except django.core.exceptions.ObjectDoesNotExist:
@@ -194,8 +203,7 @@ def update_db(infos):
                           inEnron=inEnron(sender_address),
                           category='Unknown')
             sender_.save()
-        sender_address_ = mailAddress(address=sender_address,
-                                    user=sender_)
+        sender_address_ = mailAddress(address=sender_address, user=sender_)
         sender_address_.save()
 
     for recipient_address in recipients_address:
@@ -211,8 +219,7 @@ def update_db(infos):
                               category='Unknown')
                 recipient_.save()
 
-            recipient_address_ = mailAddress(address=recipient_address,
-                                        user=recipient_)
+            recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
             recipient_address_.save()
         
         mail_ = Mail(enron_id=mail_id,
@@ -223,7 +230,7 @@ def update_db(infos):
                     isReply=isReply(mail_subject))
         mail_.save()
 
-
+'''
 def update(email):
     try:
         email_id = email['Message-ID']
@@ -231,24 +238,24 @@ def update(email):
     except django.core.exceptions.ObjectDoesNotExist:
         infos = catch_infos(email)
         update_db(infos)
-
+'''
 
 if __name__=="__main__":
 
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
     
-    x = input('Proprocess XML file (0/1)? ')
+    x = input('Preprocess XML file (0/1)? ')
     if x == '1':
         preprocessXMLFile()
     
-    x = 0#input('Create pickle file (0/1)? ')
+    x = input('Create pickle file (0/1)? ')
     if x == '1':
         pkl_fp = create_pickle(data_fp, name=pkl_file_name)
     else:
         pkl_fp = os.path.join(pkl_file_name)
 
-    x = '1'#input('Update database (0/1)? ')
+    x = input('Update database (0/1)? ')
     if x == '1':
         emails = load_data(pickle_fp=pkl_fp)
         '''
