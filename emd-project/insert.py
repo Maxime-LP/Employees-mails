@@ -272,9 +272,14 @@ if __name__=="__main__":
             try:
                 email_id = email['Message-ID']
                 mail = Mail.objects.get(enron_id=email_id)
+            except app.models.DoesNotExist:
+                print(email)    
+            except ValueError:
+                print(email)
             except django.core.exceptions.ObjectDoesNotExist:
                 infos = catch_infos(email)
                 update_db(infos)
+            
             n = progress_info(n, prefix='Updating database:')
         
         print('Update database: succeeds.')

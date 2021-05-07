@@ -76,7 +76,7 @@ def employees(request):
     else:
         usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
 
-    paginator = Paginator(usr, 300)
+    paginator = Paginator(usr, 50)
     page = request.GET.get('page')
     try:
         usr = paginator.page(page)
