@@ -160,11 +160,6 @@ def days(request):
     else:
         threshold = int(threshold)
     
-    lines = request.GET.get('lines')
-    if not lines:
-        lines = 10
-    else:
-        lines = int(lines)
 
     mails_per_day = Mail.objects.annotate(time=TruncDate('date')).values('time')\
                     .filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=threshold)
