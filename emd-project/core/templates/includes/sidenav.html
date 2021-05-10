@@ -99,11 +99,6 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if 'maps' in segment %} active {% endif %}" href="/maps.html">
-              Maps
-            </a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link {% if 'tables' in segment %} active {% endif %}" href="/tables.html">
                Table de base
             </a>
@@ -114,8 +109,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if 'tables' in segment %} active {% endif %}" href="/">
-              <i class="ni ni-chat-round text-orange"></i> Network
+            <a class="nav-link {% if 'tables' in segment %} active {% endif %}" href="/couples">
+              <i class="ni ni-chat-round text-orange"></i> Couples
             </a>
           </li>
           <li class="nav-item">
@@ -125,15 +120,10 @@
           </li>
           <li class="nav-item">
             <a class="nav-link {% if 'tables' in segment %} active {% endif %}" href="/profile">
-              <i class="ni ni-badge text-grey"></i> Employees profils
+              <i class="ni ni-badge text-grey"></i> Profiles
             </a>
           </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout' %}">
-              <i class="ni ni-user-run text-red"></i> Logout
-            </a>
-          </li>
         </ul>
         <!-- Divider -->
         <hr class="my-3">
