@@ -48,6 +48,8 @@ def preprocessXMLFile():
         
         current_user.name = f"{first_name} {last_name}"
         current_user.save()
+        # 149 users
+        # 297 mailAddress
 
 
 ## Usefull function ##########################################################
@@ -67,7 +69,7 @@ def get_name(mail_address):
     
     mail_address = re.sub(r'[\'\"]', "", mail_address)
 
-    regex1 = re.compile(r'([a-zA-Z]*[\._-][a-zA-Z]*)@.*\..{,3}')
+    regex1 = re.compile(r'^([a-zA-Z]*[\._-][a-zA-Z]*)@.*\..{,3}')
     found = regex1.search(mail_address)
     if found:
         return str.title(re.sub(r'[\._-]', ' ',found.group(1))).strip()
@@ -169,11 +171,21 @@ def catch_infos(email):
 
     # mail_recipients
     email_recipients = []
-    recipient_fields = ['To', 'X-To', 'Cc', 'X-cc', 'Bcc', 'X-bcc']
+    recipient_fields = ['To', 'Cc', 'Bcc']#, 'X-To', 'X-cc', 'X-bcc']
     for field in recipient_fields:
         try:
             email_recipients += re.split(',', re.sub(r"\s+", "", email[field])) #flags=re.UNICODE))
-        except KeyError: pass
+        except KeyError:
+            pass
+
+    if len(email_recipients) == 0:
+        recipient_fields = ['X-To', 'X-cc', 'X-bcc']
+        for field in recipient_fields:
+            try:
+                email_recipients += re.split(',', re.sub(r"\s+", "", email[field])) #flags=re.UNICODE))
+            except KeyError:
+                pass
+
     # remove recipients without '@'
     regex = re.compile(r'.*@.*')
     email_recipients = [elm for elm in email_recipients if regex.match(elm)]
@@ -188,14 +200,23 @@ def catch_infos(email):
 def update_db(infos):
     
     mail_id, mail_date, mail_subject, sender_address, recipients_address = infos
+    '''
+    try:
+        name = get_name(sender_address)
+        sender_ = User.objects.get(name=name)
+        print(sender_)
+    except Exception as e:
+        print(e, '---->', sender_address)
+        print(name)
+        print()'''
     
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
     except django.core.exceptions.ObjectDoesNotExist:
         try:
-            sender_ = User.objects.get(name=get_name(sender_address))
+            sender_ = User.objects.get(name=name)
         except:
-            sender_ = User(name=get_name(sender_address),
+            sender_ = User(name=name,
                           inEnron=inEnron(sender_address),
                           category='Unknown')
             sender_.save()
@@ -209,11 +230,12 @@ def update_db(infos):
         try:
             recipient_address_ = mailAddress.objects.get(address=recipient_address)
         except django.core.exceptions.ObjectDoesNotExist:
+            name = get_name(recipient_address)
             try:
-                recipient_address_ = User.objects.get(name=get_name(recipient_address))
+                recipient_address_ = User.objects.get(name=name)
                 recipient_ = recipient_address_.user
             except:
-                recipient_ = User(name=get_name(recipient_address),
+                recipient_ = User(name=name,
                               inEnron=inEnron(recipient_address),
                               category='Unknown')
                 try:
@@ -250,17 +272,17 @@ if __name__=="__main__":
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
     
-    x = input('Preprocess XML file (0/1)? ')
+    x = '0'#input('Preprocess XML file (0/1)? ')
     if x == '1':
         preprocessXMLFile()
     
-    x = input('Create pickle file (0/1)? ')
+    x = "0"#input('Create pickle file (0/1)? ')
     if x == '1':
         pkl_fp = create_pickle(data_fp, name=pkl_file_name)
     else:
         pkl_fp = os.path.join(pkl_file_name)
 
-    x = input('Update database (0/1)? ')
+    x = '1'#input('Update database (0/1)? ')
     if x == '1':
         emails = load_data(pickle_fp=pkl_fp)
         '''
@@ -272,8 +294,8 @@ if __name__=="__main__":
             try:
                 email_id = email['Message-ID']
                 mail = Mail.objects.get(enron_id=email_id)
-            except app.models.DoesNotExist:
-                print(email)    
+            #except app.models.DoesNotExist:
+            #    print(email)    
             except ValueError:
                 print(email)
             except django.core.exceptions.ObjectDoesNotExist:
