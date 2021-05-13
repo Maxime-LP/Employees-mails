@@ -240,8 +240,7 @@ def update_db(infos):
         except django.core.exceptions.ObjectDoesNotExist:
             name = get_name(recipient_address)
             try:
-                recipient_address_ = User.objects.get(name=name)
-                recipient_ = recipient_address_.user
+                recipient_ = User.objects.get(name=name)
             except:
                 recipient_ = User(name=name,
                               inEnron=inEnron(recipient_address),
@@ -250,6 +249,7 @@ def update_db(infos):
                     recipient_.save()
                 except Exception as e:
                     print(e, '----->', recipient_)
+                    recipient_ = 
 
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
             try:
