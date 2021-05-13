@@ -54,56 +54,52 @@ def employees(request):
 
     start_date = request.GET.get('start_date')
     if not start_date:
-        print(type(start_date))
-    else:
-        print(start_date)
+        start_date = datetime(1900,1,1)
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        pass
+        end_date=datetime(2100,1,1)
+    
+    threshold = request.GET.get('threshold')
+    if not threshold:
+        threshold = 0
     else:
-        pass
+        try:
+            threshold = int(threshold)
+        except ValueError:
+            threshold = 0
+
+    user = User.objects.all()
 
     lines = request.GET.get('lines')
     if not lines:
-        lines = 5
-        usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
+        paginator = Paginator(user, 10)
     else:
-        usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
+        try:
+            paginator = Paginator(user, int(lines))
+        except ValueError:
+            paginator = Paginator(user, 10)
 
-    '''
-    paginator = Paginator(usr, 50)
     page = request.GET.get('page')
     try:
-        usr = paginator.page(page)
+        user = paginator.page(page)
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
-        usr = paginator.page(1)
+        user = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        usr = paginator.page(paginator.num_pages)
-    '''
+        user = paginator.page(paginator.num_pages)
 
     context = {
-        'user':usr,
-        #'current_name':quer,
+        "user":user,
         'start_date':start_date,
         'end_date':end_date,
-        'lines':lines,
+        'threshold':threshold if threshold != 0 else ''
         }
 
     return render(request, template, context)
 
-    """
-    return render(request, 'employees.html', 
-        {
-        'user':user.objects.raw(
-            #'SELECT u.name, u.category, ma.user FROM app_user AS u, app_mail_address AS ma WHERE u.name==ma.user'
-            'SELECT u.id, u.name FROM app_user AS u LIMIT 5'
-            )
-        })
-    """
-
+@login_required(login_url="/login/")
 def couples(request):
     
     start_date = request.GET.get('start_date')
@@ -139,7 +135,10 @@ def couples(request):
 
     return render(request, 'couples.html', context)
 
+@login_required(login_url="/login/")
 def days(request):
+
+    template = 'days.html'
 
     start_date = request.GET.get('start_date')
     if not start_date:
@@ -187,9 +186,9 @@ def days(request):
         'threshold':threshold if threshold != 0 else ''
         }
 
-    return render(request, 'days.html', context)
+    return render(request, template, context)
 
-
+@login_required(login_url="/login/")
 def profile(request):
 
     template = 'profile.html'
@@ -209,11 +208,9 @@ def profile(request):
 
         employee_category = employee.category
         
-        average_sent = Mail.objects.raw(f"""SELECT * 
-                                            FROM app_mail AS m 
-                                            JOIN app_mailaddress AS ma
-                                            ON ma.user_id = {employee.id};""")
-        print(average_sent)
+        average_sent_query = Mail.objects.raw(f"""SELECT ROUND(AVG(cnt.c),2) FROM (SELECT COUNT(date(m.date)) AS c FROM app_mail AS m WHERE m.sender_id IN (SELECT ma.id FROM app_mailaddress AS ma WHERE ma.user_id={employee.id}) GROUP BY date(m.date)) AS cnt LIMIT 1;""")
+    
+        print(average_sent_query)
 
         context = {'code':1,
                    'name':name,

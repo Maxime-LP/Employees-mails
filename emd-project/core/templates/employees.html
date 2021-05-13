@@ -34,14 +34,14 @@
               <div class="card-body">
                 <div class="pl-lg-0">
                   <div class="row">
-                    <div class="col-lg-2">
+                    <div class="col-lg-4">
                       <div class="form-group">
                         <label class="form-control-label" for="start_date">Start date</label>
                         <input type="date" id="start_date" class="form-control form-control-alternative"
                         name="start_date" value="{{ start_date }}">
                       </div>
                     </div>
-                    <div class="col-lg-2">
+                    <div class="col-lg-4">
                       <div class="form-group">
                         <label class="form-control-label" for="end_date">End date</label>
                         <input type="date" id="end_date" class="form-control form-control-alternative" name="end_date" value="{{ end_date }}">
@@ -55,16 +55,9 @@
                     </div>
                     <div class="col-lg-2">
                       <div class="form-group">
-                        <label class="form-control-label" for="low_thr">Low threshold</label>
-                        <input type="text" id="low_thr" class="form-control form-control-alternative" name="low_thr" 
-                        value="{{ low_thr }}" placeholder="">
-                      </div>
-                    </div>
-                    <div class="col-lg-2">
-                      <div class="form-group">
-                        <label class="form-control-label" for="hight_thr">Hight threshold</label>
-                        <input type="text" id="hight_thr" class="form-control form-control-alternative" name="hight_thr" value="{{ hight_thr }}" placeholder="" 
-                               placeholder="{{ request.user.email }}">
+                        <label class="form-control-label" for="threshold">Threshold</label>
+                        <input type="text" id="threshold" class="form-control form-control-alternative" name="threshold" 
+                        value="{{ threshold }}" placeholder="">
                       </div>
                     </div>
                   </div>
@@ -87,14 +80,18 @@
                   <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Category</th>
-                    <th scope="col">Number of emails sent and received</th>
+                    <th scope="col"># of emails</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for u in user %}
                   <tr>
-                    <td> {{ u.name }} </td>
+                    <th scope="row">
+                      <div class="media align-items-center media-body">
+                          <span class="mb-0 text-sm">{{ u.name }}</span>
+                      </div>
+                    </th>
                     <td> {{ u.category }} </td>
                     <td> {{ u.inEnron }} </td>
                     <td class="text-right">
@@ -151,39 +148,28 @@
         <div class="col">
           <div class="card shadow">
             <div class="card-header border-0">
-              <h3 class="mt-0">Communicating most internally</h3>
+              <h3 class="mt-0">The quickest to respond</h3>
             </div>
             <div class="table-responsive">
               <table class="table align-items-center table-flush">
                 <thead class="thead-light">
                   <tr>
-                    <th scope="col">first name</th>
-                    <th scope="col">last name</th>
-                    <th scope="col">category</th>
-                    <th scope="col">Users</th>
-                    <th scope="col">Completion</th>
-                    <th scope="col"></th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col"># of emails</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
+                  {% for u in user %}
                   <tr>
                     <th scope="row">
                       <div class="media align-items-center media-body">
-                          <span class="mb-0 text-sm">first</span>
+                          <span class="mb-0 text-sm">{{ u.name }}</span>
                       </div>
                     </th>
-                    <td>
-                      nxdxsngc
-                    </td>
-                    <td>
-                      nhdnx
-                    </td>
-                    <td>
-                      bsr
-                    </td>
-                    <td>
-                      btrs
-                    </td>
+                    <td> {{ u.category }} </td>
+                    <td> {{ u.inEnron }} </td>
                     <td class="text-right">
                       <div class="dropdown">
                         <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -195,35 +181,7 @@
                       </div>
                     </td>
                   </tr>
-                  <tr>
-                    <th scope="row">
-                      <div class="media align-items-center media-body">
-                          <span class="mb-0 text-sm">first</span>
-                      </div>
-                    </th>
-                    <td>
-                      nxdxsngc
-                    </td>
-                    <td>
-                      nhdnx
-                    </td>
-                    <td>
-                      bsr
-                    </td>
-                    <td>
-                      btrs
-                    </td>
-                    <td class="text-right">
-                      <div class="dropdown">
-                        <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                          <a class="dropdown-item" href="#">View profile</a>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -235,39 +193,28 @@
         <div class="col">
           <div class="card shadow">
             <div class="card-header border-0">
-              <h3 class="mb-0">Communicating most internally</h3>
+              <h3 class="mb-0">Greatest informations' broadcasters</h3>
             </div>
             <div class="table-responsive">
               <table class="table align-items-center table-flush">
                 <thead class="thead-light">
                   <tr>
-                    <th scope="col">first name</th>
-                    <th scope="col">last name</th>
-                    <th scope="col">category</th>
-                    <th scope="col">Users</th>
-                    <th scope="col">Completion</th>
-                    <th scope="col"></th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col"># of emails</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
+                  {% for u in user %}
                   <tr>
                     <th scope="row">
                       <div class="media align-items-center media-body">
-                          <span class="mb-0 text-sm">first</span>
+                          <span class="mb-0 text-sm">{{ u.name }}</span>
                       </div>
                     </th>
-                    <td>
-                      nxdxsngc
-                    </td>
-                    <td>
-                      nhdnx
-                    </td>
-                    <td>
-                      bsr
-                    </td>
-                    <td>
-                      btrs
-                    </td>
+                    <td> {{ u.category }} </td>
+                    <td> {{ u.inEnron }} </td>
                     <td class="text-right">
                       <div class="dropdown">
                         <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -279,6 +226,7 @@
                       </div>
                     </td>
                   </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
