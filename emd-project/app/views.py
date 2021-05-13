@@ -153,7 +153,10 @@ def days(request):
     if not threshold:
         threshold = 0
     else:
-        threshold = int(threshold)
+        try:
+            threshold = int(threshold)
+        except ValueError:
+            threshold = 0
 
     mails_per_day = Mail.objects.annotate(time=TruncDate('date')).values('time')\
                     .filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=threshold)
@@ -162,7 +165,10 @@ def days(request):
     if not lines:
         paginator = Paginator(mails_per_day, 10)
     else:
-        paginator = Paginator(mails_per_day, int(lines))
+        try:
+            paginator = Paginator(mails_per_day, int(lines))
+        except ValueError:
+            paginator = Paginator(mails_per_day, 10)
 
     page = request.GET.get('page')
     try:
@@ -178,7 +184,7 @@ def days(request):
         "days":mails_per_day,
         'start_date':start_date,
         'end_date':end_date,
-        'threshold':threshold
+        'threshold':threshold if threshold != 0 else ''
         }
 
     return render(request, 'days.html', context)
