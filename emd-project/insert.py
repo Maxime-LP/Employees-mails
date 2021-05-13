@@ -63,7 +63,10 @@ def convert(date):
     #e.g. 4 Dec 2000 02:09:00 -0800 (PST) into 2000-12-04 10:09:00+00:00
     if date[1] == ' ':            #ie if the day has only one digit
         date = '0' + date             #for string length consistency
-    converted_date = datetime.strptime(date, '%d %b %Y %H:%M:%S %z')
+    try:
+        converted_date = datetime.strptime(date, '%d %b %Y %H:%M:%S %z')
+    except ValueError:
+        print(date)
     #converting the date in UTC format
     UTC = timezone(timedelta(hours = 0))
     converted_date = converted_date.astimezone(UTC)
@@ -282,7 +285,7 @@ if __name__=="__main__":
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
     
-    x = input('Preprocess XML file (0/1)? ')
+    x = "0"#input('Preprocess XML file (0/1)? ')
     if x == '1':
         preprocessXMLFile()
     
@@ -292,7 +295,7 @@ if __name__=="__main__":
     else:
         pkl_fp = os.path.join(pkl_file_name)
 
-    x = input('Update database (0/1)? ')
+    x = "1"#input('Update database (0/1)? ')
     if x == '1':
         emails = load_data(pickle_fp=pkl_fp)
         '''
