@@ -249,7 +249,6 @@ def update_db(infos):
                     recipient_.save()
                 except Exception as e:
                     print(e, '----->', recipient_)
-                    recipient_ = 
 
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
             try:
