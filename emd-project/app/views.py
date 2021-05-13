@@ -47,15 +47,10 @@ def pages(request):
         html_template = loader.get_template( 'page-500.html' )
         return HttpResponse(html_template.render(context, request))
 
+@login_required(login_url="/login/")
 def employees(request):
 
-    quer = request.GET.get('quer')
-    #current_name = query
-    if not quer:
-        usr = User.objects.all()
-        pass
-    else:
-        pass
+    template = 'employees.html'
 
     start_date = request.GET.get('start_date')
     if not start_date:
@@ -71,11 +66,12 @@ def employees(request):
 
     lines = request.GET.get('lines')
     if not lines:
-        lines = 10
+        lines = 5
         usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
     else:
         usr = User.objects.raw(f'SELECT u.id, u.name FROM app_user AS u LIMIT {lines}')
 
+    '''
     paginator = Paginator(usr, 50)
     page = request.GET.get('page')
     try:
@@ -86,18 +82,17 @@ def employees(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         usr = paginator.page(paginator.num_pages)
+    '''
+
     context = {
         'user':usr,
-        'current_name':quer,
+        #'current_name':quer,
         'start_date':start_date,
         'end_date':end_date,
         'lines':lines,
         }
 
-    load_template = request.path.split('/')[-1]
-    template = loader.get_template('employees.html')
-
-    return render(request, 'employees.html', context)
+    return render(request, template, context)
 
     """
     return render(request, 'employees.html', 
@@ -173,28 +168,50 @@ def days(request):
 
     return render(request, 'days.html', context)
 
+
 def profile(request):
 
-    user = request.GET.get('user')
-    if not user:
-        return render(request, 'profile_enron.html', {
-                        'user':-1,
-                        'daily_sent_mails_mean':0,
-                        'daily_received_mails_mean':0,
-                        'mean_response_time': 0,
-                        'ratio':0,
-                        'internal_contacts':[]
-                                })
+    template = 'profile.html'
+
+    employee_name = request.GET.get('employee_name')
+    if not employee_name:
+        context = {'code':0}
+        return render(request, template, context)
+    else:
+        try:
+            employee = User.objects.get(name=employee_name)
+        except:
+            context = {'code':-1,
+                        'name':name
+                        }
+            return render(request, template, context)
+
+        employee_category = employee.category
+        r = 'rien'
+
+        context = {'code':1,
+                   'name':employee_name,
+                   'category':employee_category,
+                   'average_sent':0,
+                   'average_received':0,
+                   'average_response_time':0,
+                   'ie_ratio':0,
+                   }
+
+        return render(request, template, context)
+    '''
+    print(type(user))
     try:
         user = User.objects.get(name = user)
     except django.core.exceptions.ObjectDoesNotExist:
+        print('except:', user)
         raise Exception("User does not exist")
     
-    mails = Mail.objects.raw(f'''SELECT app_Mail.*
+    mails = Mail.objects.raw(f"""SELECT app_Mail.*
                                 FROM app_Mail 
                                 JOIN app_mailAddress
                                     ON app_mailAddress.user_id = {user.id}
-                                WHERE (app_mailAddress.id = app_Mail.sender_id OR app_mailAddress.id = app_Mail.recipient_id);''')
+                                WHERE (app_mailAddress.id = app_Mail.sender_id OR app_mailAddress.id = app_Mail.recipient_id);""")
     mean_response_time = 0
     number_of_responses = 0
     number_of_internal_mails = 0
@@ -256,4 +273,4 @@ def profile(request):
         'internal_contacts':internal_contacts
         }
 
-    return render(request, 'profile_enron.html', context)
+    return render(request, 'profile_enron.html', context)'''

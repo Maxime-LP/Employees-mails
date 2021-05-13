@@ -270,6 +270,7 @@ def update_db(infos):
             mail_.save()
         except django.db.utils.DataError:
             print(mail_id)
+            break
 
 '''
 def update(email):
