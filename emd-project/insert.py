@@ -67,6 +67,7 @@ def convert(date):
         converted_date = datetime.strptime(date, '%d %b %Y %H:%M:%S %z')
     except ValueError:
         print(date)
+        return None
     #converting the date in UTC format
     UTC = timezone(timedelta(hours = 0))
     converted_date = converted_date.astimezone(UTC)
