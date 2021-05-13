@@ -224,12 +224,15 @@ def update_db(infos):
             sender_ = User(name=name,
                           inEnron=inEnron(sender_address),
                           category='Unknown')
-            sender_.save()
+            try:
+                sender_.save()
+            except Exception as e:
+                print(e, '----->', sender_)
         sender_address_ = mailAddress(address=sender_address, user=sender_)
         try:
             sender_address_.save()
         except django.db.utils.DataError:
-            print(mail_id, ':', sender_address)
+            print(mail_id, ':', sender_address_)
 
     for recipient_address in recipients_address:
         try:
@@ -245,11 +248,14 @@ def update_db(infos):
                               category='Unknown')
                 try:
                     recipient_.save()
-                except django.db.utils.DataError:
-                    print(mail_id, ':', recipient_address)
+                except Exception as e:
+                    print(e, '----->', recipient_)
 
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
-            recipient_address_.save()
+            try:
+                recipient_address_.save()
+            except:
+                print(mail_id, ':', recipient_address_)
         
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
