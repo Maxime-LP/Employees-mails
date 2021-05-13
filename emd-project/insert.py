@@ -308,9 +308,7 @@ if __name__=="__main__":
         for email in emails.values():
             try:
                 email_id = email['Message-ID']
-                mail = Mail.objects.get(enron_id=email_id)
-            #except app.models.DoesNotExist:
-            #    print(email)    
+                mail = Mail.objects.get(enron_id=email_id)    
             except ValueError:
                 print(email)
             except django.core.exceptions.ObjectDoesNotExist:

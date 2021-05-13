@@ -149,15 +149,30 @@ def days(request):
     if not end_date:
         end_date=datetime(2100,1,1)
     
-    threshold = request.GET.get('thr')
+    threshold = request.GET.get('threshold')
     if not threshold:
-        threshold = 10
+        threshold = 0
     else:
         threshold = int(threshold)
-    
 
     mails_per_day = Mail.objects.annotate(time=TruncDate('date')).values('time')\
                     .filter(date__gte=start_date,date__lte=end_date).annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=threshold)
+
+    lines = request.GET.get('lines')
+    if not lines:
+        paginator = Paginator(mails_per_day, 10)
+    else:
+        paginator = Paginator(mails_per_day, int(lines))
+
+    page = request.GET.get('page')
+    try:
+        mails_per_day = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        mails_per_day = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        mails_per_day = paginator.page(paginator.num_pages)
 
     context = {
         "days":mails_per_day,
@@ -173,13 +188,13 @@ def profile(request):
 
     template = 'profile.html'
 
-    employee_name = request.GET.get('employee_name')
-    if not employee_name:
+    name = request.GET.get('name')
+    if not name:
         context = {'code':0}
         return render(request, template, context)
     else:
         try:
-            employee = User.objects.get(name=employee_name)
+            employee = User.objects.get(name=name)
         except:
             context = {'code':-1,
                         'name':name
@@ -187,10 +202,15 @@ def profile(request):
             return render(request, template, context)
 
         employee_category = employee.category
-        r = 'rien'
+        
+        average_sent = Mail.objects.raw(f"""SELECT * 
+                                            FROM app_mail AS m 
+                                            JOIN app_mailaddress AS ma
+                                            ON ma.user_id = {employee.id};""")
+        print(average_sent)
 
         context = {'code':1,
-                   'name':employee_name,
+                   'name':name,
                    'category':employee_category,
                    'average_sent':0,
                    'average_received':0,
@@ -200,13 +220,6 @@ def profile(request):
 
         return render(request, template, context)
     '''
-    print(type(user))
-    try:
-        user = User.objects.get(name = user)
-    except django.core.exceptions.ObjectDoesNotExist:
-        print('except:', user)
-        raise Exception("User does not exist")
-    
     mails = Mail.objects.raw(f"""SELECT app_Mail.*
                                 FROM app_Mail 
                                 JOIN app_mailAddress
