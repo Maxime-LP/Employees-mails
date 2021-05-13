@@ -8,6 +8,7 @@ from time import time
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
 django.setup()
+import django.db.utils
 from django.utils.timezone import datetime, timezone, timedelta
 from app.models import mailAddress, Mail, User
 import xml.etree.ElementTree as ET
@@ -44,12 +45,15 @@ def preprocessXMLFile():
 
             elif subchild.tag == 'email':
                 new_mail = mailAddress(address = subchild.attrib['address'], user = current_user)
-                new_mail.save()
+                try:
+                    new_mail.save()
+                except django.db.utils.IntegrityError as e:
+                    print(e)
         
         current_user.name = f"{first_name} {last_name}"
         current_user.save()
-        # 149 users
-        # 297 mailAddress
+    # 149 users
+    # 297 mailAddress
 
 
 ## Usefull function ##########################################################
@@ -213,6 +217,7 @@ def update_db(infos):
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
     except django.core.exceptions.ObjectDoesNotExist:
+        name = get_name(sender_address)
         try:
             sender_ = User.objects.get(name=name)
         except:
@@ -272,7 +277,7 @@ if __name__=="__main__":
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
     
-    x = '0'#input('Preprocess XML file (0/1)? ')
+    x = input('Preprocess XML file (0/1)? ')
     if x == '1':
         preprocessXMLFile()
     
@@ -282,7 +287,7 @@ if __name__=="__main__":
     else:
         pkl_fp = os.path.join(pkl_file_name)
 
-    x = '1'#input('Update database (0/1)? ')
+    x = input('Update database (0/1)? ')
     if x == '1':
         emails = load_data(pickle_fp=pkl_fp)
         '''

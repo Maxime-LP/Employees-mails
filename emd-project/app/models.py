@@ -14,6 +14,12 @@ class User(models.Model):
     inEnron = models.BooleanField(null=False)
     category = models.CharField(null=True, max_length=40)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='name_unique')
+        ]
+        
+
     def __str__(self):
         return f"{self.id}, {self.name}, {self.inEnron}, {self.category}"
 
@@ -22,6 +28,11 @@ class mailAddress(models.Model):
     
     address = models.EmailField(max_length=200)
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['address'], name='address_unique')
+        ]
 
     def __str__(self):
         return f"{self.address}, {self.user.name}"
