@@ -10,6 +10,7 @@ from django.template import loader
 from django.http import HttpResponse
 from django import template
 from app.models import User, mailAddress, Mail
+from django.db.models.functions import TruncMonth, ExtractMonth
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from collections import defaultdict
@@ -18,8 +19,19 @@ from numpy import mean
 
 @login_required(login_url="/login/")
 def index(request):
+
     template = 'index.html'
-    context = {'segment':'index'}
+
+    email_exchanges = Mail.objects.count()
+    num_collaborators = User.objects.filter(in_enron=True).count()
+    extern_contact = User.objects.filter(in_enron=False).count()
+    intern_exchange = Mail.objects.filter(is_intern=True).count() / Mail.objects.filter(is_intern=False).count()
+
+    context = {'email_exchanges':email_exchanges,
+               'num_collaborators':num_collaborators,
+               'extern_contact':extern_contact,
+               'intern_exchange':round(intern_exchange,1),}
+
     return render(request, template, context)
 
 
@@ -109,15 +121,15 @@ def employees(request):
 @login_required(login_url="/login/")
 def couples(request):
     
-    template = 'employees.html'
+    template = 'couples.html'
 
     start_date = request.GET.get('start_date')
     if not start_date:
-        start_date = '1900-01-01'
+        start_date = datetime(1900,1,1)
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        end_date='2100-01-01'
+        end_date = datetime(2100,1,1)
     
     low_thr = request.GET.get('low_thr')
     if not low_thr:
@@ -184,7 +196,7 @@ def days(request):
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        end_date=datetime(2100,1,1)
+        end_date = datetime(2100,1,1)
     
     threshold = request.GET.get('threshold')
     if not threshold:
