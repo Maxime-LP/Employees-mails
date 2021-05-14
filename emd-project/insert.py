@@ -209,7 +209,7 @@ def catch_infos(email):
 
 def update_db(infos):
     
-    mail_id, mail_date, mail_subject, sender_address, recipients_address = infos
+    mail_id, mail_date, sender_address, recipients_address = infos #, mail_subject
     '''
     try:
         name = get_name(sender_address)
