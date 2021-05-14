@@ -76,6 +76,12 @@ def get_name(mail_address):
     
     mail_address = re.sub(r'[\'\"]', "", mail_address)
 
+    if len(mail_address) > 100:
+        regex0 = re.compile(r'^_([0-9a-zA-Z]*)@newman.oscar.aol.com$')
+        found = regex0.search(mail_address)
+        if found:
+            return found.group(1).strip()
+
     regex1 = re.compile(r'^([a-zA-Z]*[\._-]{,2}[a-zA-Z]*)@.*\..{,3}')
     found = regex1.search(mail_address)
     if found:

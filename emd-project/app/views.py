@@ -30,44 +30,68 @@ def employees(request):
 
     start_date = request.GET.get('start_date')
     if not start_date:
-        start_date = datetime(1900,1,1)
+        start_date = '1900-01-01'
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        end_date=datetime(2100,1,1)
+        end_date='2100-01-01'
     
-    threshold = request.GET.get('threshold')
-    if not threshold:
-        threshold = 0
+    low_thr = request.GET.get('low_thr')
+    if not low_thr:
+        low_thr = 0
     else:
         try:
-            threshold = int(threshold)
+            low_thr = int(low_thr)
         except ValueError:
-            threshold = 0
+            low_thr = 0
 
-    user = User.objects.all()
-    mci = 0
+    high_thr = request.GET.get('high_thr')
+    if not high_thr:
+        high_thr = 10**6
+    else:
+        try:
+            high_thr = int(high_thr)
+        except ValueError:
+            high_thr = 10**6
+
+    user = User.objects.all()[:3]
+    '''mci = User.objects.raw(f"""select u.name, u.category, cnt.c
+                                        from app_user as u, (select sender_id, count(sender_id) as c 
+                                                             from app_mail 
+                                                             where is_intern=True and date(date) > {start_date} AND date(date) < {end_date} 
+                                                             group by sender_id) as cnt 
+                                        where cnt.sender_id = u.id and cnt.c > {low_thr} and cnt.c < {high_thr} 
+                                        ORDER BY c DESC;""")'''
+    mci = User.objects.raw(f"""select u.id, u.name, u.category, cnt.c
+                            from app_user as u, (select sender_id, count(sender_id) as c 
+                                                 from app_mail 
+                                                 where is_intern=True and date(date) > '{start_date}' and date(date) < '{end_date}'
+                                                 group by sender_id) as cnt 
+                            where cnt.sender_id = u.id and cnt.c > '{low_thr}' and cnt.c < '{high_thr}' 
+                            ORDER BY c DESC;""")
+
+
     tqr = 0
     gib = 0
 
     lines = request.GET.get('lines')
     if not lines:
-        paginator = Paginator(user, 5)
+        paginator = Paginator(mci, 5)
     else:
         try:
-            paginator = Paginator(user, int(lines))
+            paginator = Paginator(mci, int(lines))
         except ValueError:
-            paginator = Paginator(user, 5)
+            paginator = Paginator(mci, 5)
 
     page = request.GET.get('page')
     try:
-        user = paginator.page(page)
+        mci = paginator.page(page)
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
-        user = paginator.page(1)
+        mci = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        user = paginator.page(paginator.num_pages)
+        mci = paginator.page(paginator.num_pages)
 
     context = {
         "user":user,
@@ -76,7 +100,8 @@ def employees(request):
         'gib':gib,
         'start_date':start_date,
         'end_date':end_date,
-        'threshold':threshold if threshold != 0 else ''
+        'low_thr':low_thr if low_thr != 0 else '',
+        'high_thr':high_thr if high_thr != 10**6 else ''
         }
 
     return render(request, template, context)
@@ -84,38 +109,69 @@ def employees(request):
 @login_required(login_url="/login/")
 def couples(request):
     
+    template = 'employees.html'
+
     start_date = request.GET.get('start_date')
     if not start_date:
-        start_date = 0
-    else:
-        print(start_date)
+        start_date = '1900-01-01'
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        pass
+        end_date='2100-01-01'
+    
+    low_thr = request.GET.get('low_thr')
+    if not low_thr:
+        low_thr = 0
     else:
-        pass
+        try:
+            low_thr = int(low_thr)
+        except ValueError:
+            low_thr = 0
 
-    threshold = request.GET.get('threshold')
-    if not threshold:
-        threshold = 10
+    high_thr = request.GET.get('high_thr')
+    if not high_thr:
+        high_thr = 10**6
     else:
-        threshold = int(threshold)
+        try:
+            high_thr = int(high_thr)
+        except ValueError:
+            high_thr = 10**6
 
-    lines = request.GET.get('lines')
-    if not lines:
-        lines = 10
-    else:
-        lines = int(lines)
-
+    user = User.objects.all()[:3]
+    couples = 0
+    '''
     couples = User.objects.raw(f"""SELECT app_user.user1 as user1, app_user.user2 as user2, app_mail.mail, COUNT(app_mail.mail) as count FROM app_mail JOIN app_mailAddress
                                 ON app_mailAddress.user_id = user1.id""")
 
+    lines = request.GET.get('lines')
+    if not lines:
+        paginator = Paginator(couples, 5)
+    else:
+        try:
+            paginator = Paginator(couples, int(lines))
+        except ValueError:
+            paginator = Paginator(couples, 5)
+
+    page = request.GET.get('page')
+    try:
+        couples = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        couples = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        couples = paginator.page(paginator.num_pages)
+    '''
     context = {
-    
+        "user":user,
+        'couples':couples,
+        'start_date':start_date,
+        'end_date':end_date,
+        'low_thr':low_thr if low_thr != 0 else '',
+        'high_thr':high_thr if high_thr != 10**6 else ''
         }
 
-    return render(request, 'couples.html', context)
+    return render(request, template, context)
 
 @login_required(login_url="/login/")
 def days(request):
@@ -188,7 +244,7 @@ def profile(request):
                     }
         return render(request, template, context)
 
-    if user.inEnron == False:
+    if user.in_enron == False:
         context = {'code':-2,
                     'name':name
                     }
@@ -208,22 +264,24 @@ def profile(request):
     daily_sent_mails = defaultdict(lambda: 0)
     daily_received_mails = defaultdict(lambda: 0)
 
+
     for m in emails:
-        #2000-12-04 10:09:00+00:00
-        try:           
-            sender = User.objects.get(id=m.sender_id)
-            recipient = User.objects.get(id=m.recipient_id)
-        except:
-            print('mail_id:',m.enron_id, '- sender_id:', {m.sender_id}, '- recipient_id:', {m.recipient_id})
+        
+        sender = User.objects.get(id=m.sender_id)
+        recipient = User.objects.get(id=m.recipient_id)
+        
+        print(sender.name)
         if sender.name == user.name:
+            print('ok')
             daily_sent_mails[str(m.date)[:10]] += 1
-            if recipient.inEnron:
+            if recipient.in_enron:
                 number_of_internal_mails += 1
                 internal_contacts.append(recipient.name)
             else:
                 number_of_external_mails += 1
 
-            if m.isReply:
+            if m.is_reply:
+                print('in reply')
                 try:
                     previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_mail AS m WHERE m.sender_id = {m.recipient_id} AND m.recipient_id = {m.sender_id} AND m.date < {m.date} ORDER BY m.date DESC LIMIT 1;""")
                 except django.core.exceptions.ObjectDoesNotExist:
@@ -231,14 +289,11 @@ def profile(request):
 
                 if previous_mail is not None:
                     number_of_responses += 1
-                    #print(previous_mail)
-                    #for elm in previous_mail:
-                    #    print(elm)
                     response_time += (m.date - previous_mail.date).total_seconds()
 
         else:
             daily_received_mails[str(m.date)[:10]]+=1
-            if sender.inEnron:
+            if sender.in_enron:
                 number_of_internal_mails += 1
             else:
                 number_of_external_mails += 1
@@ -249,21 +304,24 @@ def profile(request):
         internal_contacts = 0            
         
     if number_of_responses != 0:
-        mean_response_time = response_time / number_of_responses
+        print('ok')
+        print(response_time,'/', number_of_responses,"=", average_response_time)
+        average_response_time = response_time / number_of_responses
     
     if number_of_external_mails == 0:
         ie_ratio = number_of_internal_mails
     else:
-        ie_ratio = number_of_internal_mails / number_of_external_mails
+        ie_ratio = number_of_internal_mails / (number_of_internal_mails + number_of_external_mails)
     
-
+    print(list(daily_sent_mails.values()))
     context = {'code':1,
                'name':name,
                'category':user.category,
                'average_sent':round(mean(list(daily_sent_mails.values())),2),
                'average_received':round(mean(list(daily_received_mails.values())),2),
-               'average_response_time':0,
-               'ie_ratio':ie_ratio,
+               'average_response_time':average_response_time,
+               'number_of_internal_mails':number_of_internal_mails,
+               'number_of_external_mails':number_of_external_mails,
                'internal_contacts':internal_contacts,
                }
 
@@ -285,13 +343,13 @@ def profile(request):
 
         if sender.name == user.name:
             daily_sent_mails[str(m.date)[:10]]+=1
-            if recipient.inEnron:
+            if recipient.in_enron:
                 number_of_internal_mails+=1
                 internal_contacts.append(recipient.name)
             else:
                 number_of_external_mails+=1
 
-            if m.isReply:
+            if m.is_reply:
                 try:
                     previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_Mail WHERE mail.sender_id = {m.recipient_id} AND 
                                                         mail.recipient_id={m.sender_id} AND mail.date < {m.date} 
@@ -305,7 +363,7 @@ def profile(request):
 
         else:
             daily_received_mails[str(m.date)[:10]]+=1
-            if sender.inEnron:
+            if sender.in_enron:
                 number_of_internal_mails+=1
             else:
                 number_of_external_mails+=1
