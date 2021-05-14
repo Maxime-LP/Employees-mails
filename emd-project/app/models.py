@@ -10,7 +10,7 @@ from django.db import models
 #modèle 2
 class User(models.Model):
   
-    name = models.CharField(null=True, max_length=200)
+    name = models.CharField(null=True, max_length=100)
     inEnron = models.BooleanField(null=False)
     category = models.CharField(null=True, max_length=40)
 
@@ -41,7 +41,7 @@ class mailAddress(models.Model):
 class Mail(models.Model):
     enron_id = models.CharField(max_length=120, primary_key=True)
     date = models.DateTimeField(null=True)
-    subject = models.CharField(max_length=200,null=True)
+    subject = models.CharField(max_length=750,null=True)
     sender = models.ForeignKey(mailAddress,null=True,on_delete=models.CASCADE,related_name='sender')
     recipient = models.ForeignKey(mailAddress,null=True,on_delete=models.CASCADE,related_name='recipient')
     isReply = models.BooleanField(null=True)
