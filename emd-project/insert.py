@@ -175,6 +175,9 @@ def catch_infos(email):
     
     # mail_subject
     #email_subject = email['Subject']
+
+    # is_reply
+    is_reply = isReply(email['Subject'])
     
     # mail_sender
     email_sender = email['From']
@@ -209,7 +212,7 @@ def catch_infos(email):
 
 def update_db(infos):
     
-    mail_id, mail_date, sender_address, recipients_address = infos #, mail_subject
+    mail_id, mail_date, is_reply, sender_address, recipients_address = infos #, mail_subject
     '''
     try:
         name = get_name(sender_address)
@@ -264,10 +267,10 @@ def update_db(infos):
         
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
-                    subject=mail_subject,
+                    #subject=mail_subject,
                     sender=sender_address_,
                     recipient=recipient_address_,
-                    isReply=isReply(mail_subject))
+                    isReply=is_reply)
         try:
             mail_.save()
         except Exception as e:
