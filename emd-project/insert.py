@@ -239,19 +239,22 @@ def update_db(infos):
             sender_ = User(name=name,
                           in_enron=inEnron(sender_address),
                           category='Unknown')
-            try:
+            sender_.save()
+            '''try:
                 sender_.save()
             except Exception as e:
                 print(mail_id)
                 print(e, '----->', sender_)
-                return False
+                return False'''
         sender_address_ = mailAddress(address=sender_address, user=sender_)
+        sender_address_.save()
+        '''
         try:
             sender_address_.save()
         except Exception as e:
             print(mail_id)
             print(e, ':', sender_address_)
-            return False
+            return False'''
 
     for recipient_address in recipients_address:
         try:
@@ -264,27 +267,33 @@ def update_db(infos):
                 recipient_ = User(name=name,
                               in_enron=inEnron(recipient_address),
                               category='Unknown')
+                recipient_.save()
+                '''
                 try:
                     recipient_.save()
                 except Exception as e:
                     print(mail_id)
                     print(e, '----->', recipient_)
                     return False
-
+                '''
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
+            recipient_address_.save()
+            '''
             try:
                 recipient_address_.save()
             except Exception as e:
                 print(mail_id)
                 print(e, ':', recipient_address_)
                 return False
-        
+            '''
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
                     sender=sender_address_,
                     recipient=recipient_address_,
                     is_intern = is_intern,
                     is_reply=is_reply)
+        mail_.save()
+        '''
         try:
             mail_.save()
         except Exception as e:
@@ -292,6 +301,7 @@ def update_db(infos):
             print(e, '----->', mail_)
             return False
         return True
+        '''
 
 if __name__=="__main__":
 
@@ -321,8 +331,10 @@ if __name__=="__main__":
                 print(ve, ':', email_id)
             except django.core.exceptions.ObjectDoesNotExist:
                 infos = catch_infos(email)
-                if not update_db(infos):
-                    error.append(email_id)
+                try:
+                    update_db(infos)
+                except Exception:
+                    print(email_id)
             
             n = progress_info(n, prefix='Updating database:')
         
