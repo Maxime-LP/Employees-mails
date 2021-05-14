@@ -79,7 +79,7 @@ DATABASES = {
         'HOST': 'savennieres.math.univ-angers.fr',
         'PORT': '5432',
         'OPTIONS': {
-            'options': '-c search_path=emd'
+            'options': '-c search_path=emd2'
           },
         }
     }

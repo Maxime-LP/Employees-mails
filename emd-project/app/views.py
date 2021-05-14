@@ -226,7 +226,7 @@ def profile(request):
                 sender = User.objects.get(id=m.sender_id)
                 recipient = User.objects.get(id=m.recipient_id)#m.recipient_id)
             except:
-                print('sender_id:', {m.sender_id}, 'recipient_id:', {m.recipient_id})
+                print('mail_id:',m.enron_id, '- sender_id:', {m.sender_id}, '- recipient_id:', {m.recipient_id})
             if sender.name == user.name:
                 daily_sent_mails[str(m.date)[:10]] += 1
                 if recipient.inEnron:

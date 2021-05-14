@@ -159,7 +159,9 @@ def load_data(pickle_fp):
 def catch_infos(email):
 
     # mail_id
-    email_id = email['Message-ID']
+    regex = re.compile(r'^<([0-9]*\.[0-9]*)\.JavaMail\.evans@thyme>$')
+    email_id = regex.search(email['Message-ID']).group(1)
+    print(email_id)
     
     # mail_date
     try:
@@ -172,14 +174,14 @@ def catch_infos(email):
         email_date = None
     
     # mail_subject
-    email_subject = email['Subject']
+    #email_subject = email['Subject']
     
     # mail_sender
     email_sender = email['From']
 
     # mail_recipients
     email_recipients = []
-    recipient_fields = ['To', 'Cc', 'Bcc']#, 'X-To', 'X-cc', 'X-bcc']
+    recipient_fields = ['To', 'Cc', 'Bcc']
     for field in recipient_fields:
         try:
             email_recipients += re.split(',', re.sub(r"\s+", "", email[field])) #flags=re.UNICODE))
@@ -200,7 +202,7 @@ def catch_infos(email):
     # remove duplicate recipients
     email_recipients = list(set(email_recipients))
 
-    infos = [email_id, email_date, email_subject, email_sender, email_recipients]
+    infos = [email_id, email_date, email_sender, email_recipients]#, email_subject
     
     return infos
 
@@ -277,17 +279,17 @@ if __name__=="__main__":
     data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
     
-    x = "0"#input('Preprocess XML file (0/1)? ')
+    x = input('Preprocess XML file (0/1)? ')
     if x == '1':
         preprocessXMLFile()
     
-    x = "0"#input('Create pickle file (0/1)? ')
+    x = input('Create pickle file (0/1)? ')
     if x == '1':
         pkl_fp = create_pickle(data_fp, name=pkl_file_name)
     else:
         pkl_fp = os.path.join(pkl_file_name)
 
-    x = "1"#input('Update database (0/1)? ')
+    x = input('Update database (0/1)? ')
     if x == '1':
         emails = load_data(pickle_fp=pkl_fp)
         n = 1
