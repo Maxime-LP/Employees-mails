@@ -161,7 +161,6 @@ def catch_infos(email):
     # mail_id
     regex = re.compile(r'^<([0-9]*\.[0-9]*)\.JavaMail\.evans@thyme>$')
     email_id = regex.search(email['Message-ID']).group(1)
-    print(email_id)
     
     # mail_date
     try:
@@ -213,15 +212,6 @@ def catch_infos(email):
 def update_db(infos):
     
     mail_id, mail_date, is_reply, sender_address, recipients_address = infos #, mail_subject
-    '''
-    try:
-        name = get_name(sender_address)
-        sender_ = User.objects.get(name=name)
-        print(sender_)
-    except Exception as e:
-        print(e, '---->', sender_address)
-        print(name)
-        print()'''
     
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
