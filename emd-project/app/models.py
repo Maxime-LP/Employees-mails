@@ -14,7 +14,7 @@ class User(models.Model):
     category = models.CharField(max_length=40,null=False)
 
     def __str__(self):
-        return f"{self.id}, {self.name}, {self.inEnron}, {self.category}"
+        return f"{self.id}, {self.name}, {self.in_enron}, {self.category}"
 
 
 class mailAddress(models.Model):
@@ -32,6 +32,7 @@ class Mail(models.Model):
     sender = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='sender',null=False)
     recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient',null=False)
     is_reply = models.BooleanField(null=False)
+    is_intern = models.BooleanField(null=False)
 
     def __str__(self):
-        return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.subject}, {self.isReply}"
+        return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.is_reply}, {self.is_intern}"

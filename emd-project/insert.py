@@ -25,7 +25,7 @@ def preprocessXMLFile():
     root = tree.getroot()
 
     for child in root:
-        current_user = User(inEnron = True)
+        current_user = User(in_enron = True)
         current_user.save()
         
         last_name = ''
@@ -102,6 +102,14 @@ def isReply(mail_subject):
     regex = re.compile(r'^[Rr][Ee]:')
     found = regex.search(mail_subject)
     return False if found==None else True
+
+def isIntern(sender, recipients):
+    if not inEnron(sender):
+        return False
+    for recipient in recipients:
+        if not inEnron(recipient):
+            return False
+    return True
 
 def progress_info(n, prefix="Computing:", size=40, file=sys.stdout):
     if n%10 == 0:
@@ -200,15 +208,18 @@ def catch_infos(email):
     # remove duplicate recipients
     email_recipients = list(set(email_recipients))
 
-    infos = [email_id, email_date, is_reply, email_sender, email_recipients]
+    #is_intern
+    is_intern = isIntern(email_sender, email_recipients)
+
+    infos = [email_id, email_date, is_reply, is_intern, email_sender, email_recipients]
     
     return infos
 
 
 def update_db(infos):
     
-    mail_id, mail_date, is_reply, sender_address, recipients_address = infos
-    
+    mail_id, mail_date, is_reply, is_intern, sender_address, recipients_address = infos
+
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
     except django.core.exceptions.ObjectDoesNotExist:
@@ -222,12 +233,16 @@ def update_db(infos):
             try:
                 sender_.save()
             except Exception as e:
+                print(mail_id)
                 print(e, '----->', sender_)
+                return False
         sender_address_ = mailAddress(address=sender_address, user=sender_)
         try:
             sender_address_.save()
         except Exception as e:
+            print(mail_id)
             print(e, ':', sender_address_)
+            return False
 
     for recipient_address in recipients_address:
         try:
@@ -243,29 +258,36 @@ def update_db(infos):
                 try:
                     recipient_.save()
                 except Exception as e:
+                    print(mail_id)
                     print(e, '----->', recipient_)
+                    return False
 
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
             try:
                 recipient_address_.save()
             except Exception as e:
+                print(mail_id)
                 print(e, ':', recipient_address_)
+                return False
         
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
                     sender=sender_address_,
                     recipient=recipient_address_,
-                    isReply=is_reply)
+                    is_intern = is_intern,
+                    is_reply=is_reply)
         try:
             mail_.save()
         except Exception as e:
+            print(mail_id)
             print(e, '----->', mail_)
-            break
+            return False
+        return True
 
 if __name__=="__main__":
 
     data_fp = '/users/2021ds/192009056/Téléchargements/maildir' #'/home/amait/Downloads/maildir'
-    pkl_file_name = 'headers2.pkl'
+    pkl_file_name = 'headers.pkl'
     
     x = input('Preprocess XML file (0/1)? ')
     if x == '1':
@@ -279,6 +301,7 @@ if __name__=="__main__":
 
     x = input('Update database (0/1)? ')
     if x == '1':
+        error = []
         emails = load_data(pickle_fp=pkl_fp)
         n = 1
         for email in emails.values():
@@ -289,7 +312,8 @@ if __name__=="__main__":
                 print(ve, ':', email_id)
             except django.core.exceptions.ObjectDoesNotExist:
                 infos = catch_infos(email)
-                update_db(infos)
+                if not update_db(infos):
+                    error.append(email_id)
             
             n = progress_info(n, prefix='Updating database:')
         
