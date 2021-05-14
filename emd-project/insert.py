@@ -235,8 +235,8 @@ def update_db(infos):
         sender_address_ = mailAddress(address=sender_address, user=sender_)
         try:
             sender_address_.save()
-        except django.db.utils.DataError:
-            print(mail_id, ':', sender_address_)
+        except Exception as e:
+            print(e, ':', sender_address_)
 
     for recipient_address in recipients_address:
         try:
@@ -257,8 +257,8 @@ def update_db(infos):
             recipient_address_ = mailAddress(address=recipient_address, user=recipient_)
             try:
                 recipient_address_.save()
-            except:
-                print(mail_id, ':', recipient_address_)
+            except Exception as e:
+                print(e, ':', recipient_address_)
         
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
@@ -268,19 +268,9 @@ def update_db(infos):
                     isReply=isReply(mail_subject))
         try:
             mail_.save()
-        except django.db.utils.DataError:
-            print(mail_id)
+        except Exception as e:
+            print(e, '----->', mail_)
             break
-
-'''
-def update(email):
-    try:
-        email_id = email['Message-ID']
-        mail = Mail.objects.get(enron_id=email_id)
-    except django.core.exceptions.ObjectDoesNotExist:
-        infos = catch_infos(email)
-        update_db(infos)
-'''
 
 if __name__=="__main__":
 
@@ -300,17 +290,13 @@ if __name__=="__main__":
     x = "1"#input('Update database (0/1)? ')
     if x == '1':
         emails = load_data(pickle_fp=pkl_fp)
-        '''
-        with Pool(processes=os.cpu_count()) as p:
-            res = list(tqdm(p.imap(update, emails.values()), total=len(emails), leave=False))
-        '''
         n = 1
         for email in emails.values():
             try:
                 email_id = email['Message-ID']
                 mail = Mail.objects.get(enron_id=email_id)    
-            except ValueError:
-                print(email)
+            except ValueError as ve:
+                print(ve, ':', email_id)
             except django.core.exceptions.ObjectDoesNotExist:
                 infos = catch_infos(email)
                 update_db(infos)

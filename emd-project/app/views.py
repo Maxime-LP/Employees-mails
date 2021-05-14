@@ -199,35 +199,91 @@ def profile(request):
         return render(request, template, context)
     else:
         try:
-            employee = User.objects.get(name=name)
+            user = User.objects.get(name=name)
         except:
             context = {'code':-1,
                         'name':name
                         }
             return render(request, template, context)
-
-        employee_category = employee.category
         
-        average_sent_query = Mail.objects.raw(f"""SELECT ROUND(AVG(cnt.c),2) FROM (SELECT COUNT(date(m.date)) AS c FROM app_mail AS m WHERE m.sender_id IN (SELECT ma.id FROM app_mailaddress AS ma WHERE ma.user_id={employee.id}) GROUP BY date(m.date)) AS cnt LIMIT 1;""")
-    
-        print(average_sent_query)
+        emails = Mail.objects.raw(f"""SELECT m.* 
+                                      FROM app_Mail AS m 
+                                      JOIN app_mailAddress AS ma 
+                                      ON ma.user_id = {user.id} 
+                                      WHERE (ma.id = m.sender_id OR ma.id = m.recipient_id);""")
+        average_response_time = 0
+        number_of_responses = 0
+        number_of_internal_mails = 0
+        number_of_external_mails = 0
+        response_time = 0
+        internal_contacts = []
+        daily_sent_mails = defaultdict(lambda: 0)
+        daily_received_mails = defaultdict(lambda: 0)
+
+        for m in emails:
+            #2000-12-04 10:09:00+00:00
+            try:           
+                sender = User.objects.get(id=m.sender_id)
+                recipient = User.objects.get(id=m.recipient_id)#m.recipient_id)
+            except:
+                print('sender_id:', {m.sender_id}, 'recipient_id:', {m.recipient_id})
+            if sender.name == user.name:
+                daily_sent_mails[str(m.date)[:10]] += 1
+                if recipient.inEnron:
+                    number_of_internal_mails += 1
+                    internal_contacts.append(recipient.name)
+                else:
+                    number_of_external_mails += 1
+
+                if m.isReply:
+                    try:
+                        previous_mail = Mail.objects.raw(f"""SELECT mail
+                                                             FROM app_Mail AS m 
+                                                             WHERE m.sender_id = {m.recipient_id}
+                                                                                AND m.recipient_id = {m.sender_id}
+                                                                                AND m.date < {m.date} 
+                                                             ORDER BY m.date DESC
+                                                             LIMIT 1;""")
+                    except django.core.exceptions.ObjectDoesNotExist:
+                        previous_mail = None
+
+                    if previous_mail is not None:
+                        number_of_responses += 1
+                        response_time += (m.date - previous_mail.date).total_seconds()
+
+            else:
+                daily_received_mails[str(m.date)[:10]]+=1
+                if sender.inEnron:
+                    number_of_internal_mails += 1
+                else:
+                    number_of_external_mails += 1
+            
+        if internal_contacts != []:
+            internal_contacts = set(internal_contacts)
+        else:
+            internal_contacts = 0            
+            
+        if number_of_responses != 0:
+            mean_response_time = response_time / number_of_responses
+        
+        if number_of_external_mails == 0:
+            ratio = number_of_internal_mails
+        else:
+            ratio = number_of_internal_mails / number_of_external_mails
+        
 
         context = {'code':1,
                    'name':name,
-                   'category':employee_category,
+                   'category':user.category,
                    'average_sent':0,
-                   'average_received':0,
+                   'average_received':np.mean(list(daily_received_mails.values())),
                    'average_response_time':0,
                    'ie_ratio':0,
                    }
 
         return render(request, template, context)
     '''
-    mails = Mail.objects.raw(f"""SELECT app_Mail.*
-                                FROM app_Mail 
-                                JOIN app_mailAddress
-                                    ON app_mailAddress.user_id = {user.id}
-                                WHERE (app_mailAddress.id = app_Mail.sender_id OR app_mailAddress.id = app_Mail.recipient_id);""")
+    mails = Mail.objects.raw(f"""SELECT m.* FROM app_Mail AS m JOIN app_mailAddress AS ma ON ma.user_id = {user.id} WHERE (ma.id = m.sender_id OR ma.id = m.recipient_id);""")
     mean_response_time = 0
     number_of_responses = 0
     number_of_internal_mails = 0
@@ -236,33 +292,33 @@ def profile(request):
     daily_sent_mails = defaultdict(lambda: 0)
     daily_received_mails = defaultdict(lambda: 0)
     
-    for current_mail in mails:
+    for m in mails:
         #2000-12-04 10:09:00+00:00
-        sender=User.objects.get(id=current_mail.sender_id)
-        recipient=User.objects.get(id=current_mail.recipient_id)
+        sender=User.objects.get(id=m.sender_id)
+        recipient=User.objects.get(id=m.recipient_id)
 
         if sender.name == user.name:
-            daily_sent_mails[str(current_mail.date)[:10]]+=1
+            daily_sent_mails[str(m.date)[:10]]+=1
             if recipient.inEnron:
                 number_of_internal_mails+=1
                 internal_contacts.append(recipient.name)
             else:
                 number_of_external_mails+=1
 
-            if current_mail.isReply:
+            if m.isReply:
                 try:
-                    previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_Mail WHERE mail.sender_id = {current_mail.recipient_id} AND 
-                                                        mail.recipient_id={current_mail.sender_id} AND mail.date < {current_mail.date} 
+                    previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_Mail WHERE mail.sender_id = {m.recipient_id} AND 
+                                                        mail.recipient_id={m.sender_id} AND mail.date < {m.date} 
                                                         ORDER BY app_Mail.date DESC LIMIT 1;""")
                 except django.core.exceptions.ObjectDoesNotExist:
                     previous_mail = None
 
                 if previous_mail is not None:
                     number_of_responses+=1
-                    mean_response_time += (current_mail.date - previous_mail.date).total_seconds()
+                    mean_response_time += (m.date - previous_mail.date).total_seconds()
 
         else:
-            daily_received_mails[str(current_mail.date)[:10]]+=1
+            daily_received_mails[str(m.date)[:10]]+=1
             if sender.inEnron:
                 number_of_internal_mails+=1
             else:
