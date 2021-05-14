@@ -77,15 +77,20 @@ def get_name(mail_address):
     mail_address = re.sub(r'[\'\"]', "", mail_address)
 
     if len(mail_address) > 100:
-        regex0 = re.compile(r'^_([0-9a-zA-Z]*)@newman.oscar.aol.com$')
+        regex0 = re.compile(r'_([0-9a-zA-Z]*)@newman.oscar.aol.com$')
         found = regex0.search(mail_address)
         if found:
             return found.group(1).strip()
 
-    regex1 = re.compile(r'^([a-zA-Z]*[\._-]{,2}[a-zA-Z]*)@.*\..{,3}')
+    regex1 = re.compile(r'^([a-zA-Z]*[\._-][a-zA-Z]*)@.*\..{,3}')
     found = regex1.search(mail_address)
     if found:
         return str.title(re.sub(r'[\._-]', ' ',found.group(1))).strip()
+
+    regex4 = re.compile(r'^([a-zA-Z]\.\.[a-zA-Z]*)@.*\..{,3}')
+    found = regex4.search(mail_address)
+    if found:
+        return str.title(re.sub(r'\.\.', ' ',found.group(1))).strip()
 
     regex2 = re.compile(r'^<?(.*)@.*>$')
     found = regex2.search(mail_address)
@@ -177,9 +182,7 @@ def catch_infos(email):
     
     # mail_date
     try:
-
         email_date = convert(email['Date'][5:-6])
-
     except KeyError:
         # there is only one email that throws an exception.
         # --> /home/amait/Downloads/maildir/lokey-t/calendar/33.

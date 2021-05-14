@@ -33,6 +33,8 @@ class Mail(models.Model):
     recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient',null=False)
     is_reply = models.BooleanField(null=False)
     is_intern = models.BooleanField(null=False)
+    #previous_mail = models.ForeignKey(Mail,related_name='mail',null=True)
+    #next_mail = models.ForeignKey(Mail,related_name='mail',null=True)
 
     def __str__(self):
         return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.is_reply}, {self.is_intern}"
