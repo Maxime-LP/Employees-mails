@@ -323,9 +323,10 @@ if __name__=="__main__":
         error = []
         emails = load_data(pickle_fp=pkl_fp)
         n = 1
+        regex = re.compile(r'^<([0-9]*\.[0-9]*)\.JavaMail\.evans@thyme>$')
         for email in emails.values():
             try:
-                email_id = email['Message-ID']
+                email_id = regex.search(email['Message-ID']).group(1)
                 mail = Mail.objects.get(enron_id=email_id)    
             except ValueError as ve:
                 print(ve, ':', email_id)
