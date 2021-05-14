@@ -238,7 +238,7 @@ def days(request):
     return render(request, template, context)
 
 @login_required(login_url="/login/")
-def profile(request):
+def profileold(request):
 
     template = 'profile.html'
 
@@ -343,7 +343,7 @@ def profile(request):
     return render(request, template, context)
 
 
-def profiletest(request):
+def profile(request):
 
     template = 'profile.html'
 
@@ -366,79 +366,45 @@ def profiletest(request):
                     }
         return render(request, template, context)
     
-    #sent_per_day = Mail.objects.filter(f"""select avg(cnt.c) from (select date(date), count(date) as c from app_mail where sender_id=63 group by date(date)) as cnt;""")
-    #sent_per_day  = Mail.objects.annotate(time=TruncDate('date')).values('time').filter(sender_id=user.id).annotate(dcount=Count('enron_id')).order_by('-dcount')
-    #print(sent_per_day)
-    emails = Mail.objects.raw(f"""SELECT m.* 
+    
+    #mails sent / received per day
+
+
+    sent_per_day = Mail.objects.raw(f"""SELECT m.*
                                   FROM app_Mail AS m 
                                   JOIN app_mailAddress AS ma 
-                                  ON ma.user_id = {user.id} 
-                                  WHERE (ma.id = m.sender_id OR ma.id = m.recipient_id);""")
+                                    ON ma.user_id = {user.id} 
+                                  WHERE ma.id = m.sender_id;""")
+
     
+    
+    received_per_day = Mail.objects.raw(f"""SELECT m.* 
+                                  FROM app_Mail AS m 
+                                  JOIN app_mailAddress AS ma 
+                                    ON ma.user_id = {user.id} 
+                                  WHERE ma.id = m.recipient_id;""")
+
+    
+    
+
+    #SELECT mail FROM app_mail WHERE mail.sender_id = m.recipient_id AND mail.recipient_id = m.sender_id AND mail.date < m.date ORDER BY mail.date DESC LIMIT 1
+    #average response time
     average_response_time = 0
-    number_of_responses = 0
+
+    #I/E Ratio
+
     number_of_internal_mails = 0
     number_of_external_mails = 0
-    response_time = 0
-    internal_contacts = []
-    daily_sent_mails = defaultdict(lambda: 0)
-    daily_received_mails = defaultdict(lambda: 0)
 
+    #Internal contacts
 
-    for m in emails:
-        
-        sender = User.objects.get(id=m.sender_id)
-        recipient = User.objects.get(id=m.recipient_id) ### ??? m.recipient_id -> mailAddress
-        
-        print(sender.name)
-        if sender.name == user.name:
-            print('ok')
-            daily_sent_mails[str(m.date)[:10]] += 1
-            if recipient.in_enron:
-                number_of_internal_mails += 1
-                internal_contacts.append(recipient.name)
-            else:
-                number_of_external_mails += 1
+    internal_contacts = 0
 
-            if m.is_reply:
-                print('in reply')
-                try:
-                    previous_mail = Mail.objects.raw(f"""SELECT mail FROM app_mail AS m WHERE m.sender_id = {m.recipient_id} AND m.recipient_id = {m.sender_id} AND m.date < {m.date} ORDER BY m.date DESC LIMIT 1;""")
-                except django.core.exceptions.ObjectDoesNotExist:
-                    previous_mail = None
-
-                if previous_mail is not None:
-                    number_of_responses += 1
-                    response_time += (m.date - previous_mail.date).total_seconds()
-
-        else:
-            daily_received_mails[str(m.date)[:10]]+=1
-            if sender.in_enron:
-                number_of_internal_mails += 1
-            else:
-                number_of_external_mails += 1
-        
-    if internal_contacts != []:
-        internal_contacts = set(internal_contacts)
-    else:
-        internal_contacts = 0            
-        
-    if number_of_responses != 0:
-        print('ok')
-        print(response_time,'/', number_of_responses,"=", average_response_time)
-        average_response_time = response_time / number_of_responses
-    
-    if number_of_external_mails == 0:
-        ie_ratio = number_of_internal_mails
-    else:
-        ie_ratio = number_of_internal_mails / (number_of_internal_mails + number_of_external_mails)
-    
-    print(list(daily_sent_mails.values()))
     context = {'code':1,
                'name':name,
                'category':user.category,
-               'average_sent':round(mean(list(daily_sent_mails.values())),2),
-               'average_received':round(mean(list(daily_received_mails.values())),2),
+               'average_sent':sent_per_day,
+               'average_received':received_per_day,
                'average_response_time':average_response_time,
                'number_of_internal_mails':number_of_internal_mails,
                'number_of_external_mails':number_of_external_mails,
