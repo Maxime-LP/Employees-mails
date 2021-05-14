@@ -9,9 +9,9 @@ from django.db import models
 
 class User(models.Model):
   
-    name = models.CharField(max_length=100, unique=True)
-    inEnron = models.BooleanField()
-    category = models.CharField(max_length=40)
+    name = models.CharField(max_length=100,unique=True,null=False,null=False)
+    inEnron = models.BooleanField(,null=False)
+    category = models.CharField(max_length=40,null=False)
     '''
     class Meta:
         constraints = [
@@ -24,8 +24,8 @@ class User(models.Model):
 
 class mailAddress(models.Model):
     
-    address = models.EmailField(max_length=200, unique=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    address = models.EmailField(max_length=200, unique=True,null=False)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=False)
     '''
     class Meta:
         constraints = [
@@ -39,11 +39,11 @@ class mailAddress(models.Model):
 
 class Mail(models.Model):
     enron_id = models.CharField(max_length=30, primary_key=True)
-    date = models.DateTimeField(null=True)
+    date = models.DateTimeField(null=False)
     #subject = models.CharField(max_length=750,null=True)
-    sender = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='sender')
-    recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient')
-    isReply = models.BooleanField()
+    sender = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='sender',null=False)
+    recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient',null=False)
+    isReply = models.BooleanField(,null=False)
 
     def __str__(self):
         return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.subject}, {self.isReply}"
