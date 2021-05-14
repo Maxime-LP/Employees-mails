@@ -276,8 +276,8 @@ def update_db(infos):
 
 if __name__=="__main__":
 
-    data_fp = '/home/amait/Downloads/maildir'
-    pkl_file_name = 'headers.pkl'
+    data_fp = '/users/2021ds/192009056/Téléchargements/maildir' #'/home/amait/Downloads/maildir'
+    pkl_file_name = 'headers2.pkl'
     
     x = input('Preprocess XML file (0/1)? ')
     if x == '1':
