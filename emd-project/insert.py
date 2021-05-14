@@ -66,7 +66,6 @@ def convert(date):
     try:
         converted_date = datetime.strptime(date, '%d %b %Y %H:%M:%S %z')
     except ValueError:
-        print(date)
         return '2001-03-09 11:15:36:00+00:00'
     #converting the date in UTC format
     UTC = timezone(timedelta(hours = 0))
@@ -77,11 +76,11 @@ def get_name(mail_address):
     
     mail_address = re.sub(r'[\'\"]', "", mail_address)
 
-    regex1 = re.compile(r'^([a-zA-Z]*[\._-][a-zA-Z]*)@.*\..{,3}')
+    regex1 = re.compile(r'^([a-zA-Z]*[\._-]{,2}[a-zA-Z]*)@.*\..{,3}')
     found = regex1.search(mail_address)
     if found:
         return str.title(re.sub(r'[\._-]', ' ',found.group(1))).strip()
-    
+
     regex2 = re.compile(r'^<?(.*)@.*>$')
     found = regex2.search(mail_address)
     if found:
@@ -218,7 +217,7 @@ def update_db(infos):
             sender_ = User.objects.get(name=name)
         except:
             sender_ = User(name=name,
-                          inEnron=inEnron(sender_address),
+                          in_enron=inEnron(sender_address),
                           category='Unknown')
             try:
                 sender_.save()
@@ -239,7 +238,7 @@ def update_db(infos):
                 recipient_ = User.objects.get(name=name)
             except:
                 recipient_ = User(name=name,
-                              inEnron=inEnron(recipient_address),
+                              in_enron=inEnron(recipient_address),
                               category='Unknown')
                 try:
                     recipient_.save()

@@ -10,7 +10,7 @@ from django.db import models
 class User(models.Model):
   
     name = models.CharField(max_length=100,unique=True,null=False)
-    inEnron = models.BooleanField(null=False)
+    in_enron = models.BooleanField(null=False)
     category = models.CharField(max_length=40,null=False)
 
     def __str__(self):
@@ -31,7 +31,7 @@ class Mail(models.Model):
     date = models.DateTimeField(null=False)
     sender = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='sender',null=False)
     recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient',null=False)
-    isReply = models.BooleanField(null=False)
+    is_reply = models.BooleanField(null=False)
 
     def __str__(self):
         return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.subject}, {self.isReply}"
