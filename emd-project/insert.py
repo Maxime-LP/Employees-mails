@@ -204,7 +204,7 @@ def catch_infos(email):
     # remove duplicate recipients
     email_recipients = list(set(email_recipients))
 
-    infos = [email_id, email_date, email_sender, email_recipients]#, email_subject
+    infos = [email_id, email_date, is_reply, email_sender, email_recipients]#, email_subject
     
     return infos
 
