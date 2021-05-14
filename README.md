@@ -7,7 +7,7 @@
 ## Table of Contents
 
 * [Quick Start](#quick-start)
-* [File Structure](#file-structure)
+* [Documentation](#documentation)
 
 <br />
 
@@ -36,12 +36,15 @@ $ python manage.py makemigrations
 $ python manage.py migrate
 $
 $ # Init Database
-$ ./insert.py # Enter 1 three times
+$ ./insert.py # Enter 1 three times, like as follows:
+$ Preprocess XML file (0/1)? 1
+$ Create pickle file (0/1)? 1
+$ Update database (0/1)? 1
 $
 $ # Start the application
 $ python manage.py runserver # default port 8000
 $
-$ # Start the app - custom port
+$ # Or start the app with custom port
 $ # python manage.py runserver 0.0.0.0:<your_port>
 $
 $ # Access the web app in browser: http://127.0.0.1:8000/
@@ -49,12 +52,10 @@ $ # Access the web app in browser: http://127.0.0.1:8000/
 
 > Note: To use the app, please access the registration page and create a new user. After authentication, the app will unlock the private pages.
 
-<br />
+# Documentation
 
 ## File Structure
 Within the download you'll find the following directories and files:
-
-=> must be updated
 
 ```bash
 < PROJECT ROOT >
