@@ -99,6 +99,25 @@
       </div>
       {% endif %}
 
+      {% if code == -2 %}
+      <div class="row mt-4">
+        <div class="col">
+          <div class="card shadow">
+            <div class="card-header border-0">
+              <h3 class="mt-0">Error</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-items-center table-flush">
+                <tbody>
+                  <tr> <td>'{{name}}' is not an Enron employee.</td> </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
       {% if code == 1 %}
       <div class="row mt-4">
         <div class="col">
@@ -117,7 +136,7 @@
                   <tr> <td>Average number of emails received per day: {{ average_received}}</td> </tr>
                   <tr> <td>Average response time: {{ average_response_time }}</td> </tr>
                   <tr> <td>Intern / Extern ratio: {{ ie_ratio }}%</td> </tr>
-                  <tr> <td>Internal contacts: {{ ie_ratio }}%</td> </tr>
+                  <tr> <td>Internal contacts: {{ internal_contacts }}</td> </tr>
                   <!--
                   {% if mean_response_time != 0%}
                   <tr> <td>Temps de reponse moyen : {{ mean_response_time }}</td> </tr>

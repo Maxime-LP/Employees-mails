@@ -67,7 +67,7 @@ def convert(date):
         converted_date = datetime.strptime(date, '%d %b %Y %H:%M:%S %z')
     except ValueError:
         print(date)
-        return None
+        return '2001-03-09 11:15:36:00+00:00'
     #converting the date in UTC format
     UTC = timezone(timedelta(hours = 0))
     converted_date = converted_date.astimezone(UTC)
@@ -171,9 +171,6 @@ def catch_infos(email):
         # there is only one email that throws an exception.
         # --> /home/amait/Downloads/maildir/lokey-t/calendar/33.
         email_date = None
-    
-    # mail_subject
-    #email_subject = email['Subject']
 
     # is_reply
     is_reply = isReply(email['Subject'])
@@ -204,14 +201,14 @@ def catch_infos(email):
     # remove duplicate recipients
     email_recipients = list(set(email_recipients))
 
-    infos = [email_id, email_date, is_reply, email_sender, email_recipients]#, email_subject
+    infos = [email_id, email_date, is_reply, email_sender, email_recipients]
     
     return infos
 
 
 def update_db(infos):
     
-    mail_id, mail_date, is_reply, sender_address, recipients_address = infos #, mail_subject
+    mail_id, mail_date, is_reply, sender_address, recipients_address = infos
     
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
@@ -257,7 +254,6 @@ def update_db(infos):
         
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
-                    #subject=mail_subject,
                     sender=sender_address_,
                     recipient=recipient_address_,
                     isReply=is_reply)

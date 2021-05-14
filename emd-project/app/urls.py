@@ -14,5 +14,5 @@ urlpatterns = [
     re_path(r'days', views.days, name='days'),
     re_path(r'profile', views.profile, name='profile'),
     # Matches any html file
-    re_path(r'^.*\.*', views.pages, name='pages'),
+    #re_path(r'^.*\.*', views.pages, name='pages'),
 ]
