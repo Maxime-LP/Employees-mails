@@ -9,8 +9,8 @@ from django.db import models
 
 class User(models.Model):
   
-    name = models.CharField(max_length=100,unique=True,null=False,null=False)
-    inEnron = models.BooleanField(,null=False)
+    name = models.CharField(max_length=100,unique=True,null=False)
+    inEnron = models.BooleanField(null=False)
     category = models.CharField(max_length=40,null=False)
     '''
     class Meta:
@@ -38,12 +38,12 @@ class mailAddress(models.Model):
 
 
 class Mail(models.Model):
-    enron_id = models.CharField(max_length=30, primary_key=True)
+    enron_id = models.CharField(max_length=30,primary_key=True)
     date = models.DateTimeField(null=False)
     #subject = models.CharField(max_length=750,null=True)
     sender = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='sender',null=False)
     recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient',null=False)
-    isReply = models.BooleanField(,null=False)
+    isReply = models.BooleanField(null=False)
 
     def __str__(self):
         return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.subject}, {self.isReply}"
