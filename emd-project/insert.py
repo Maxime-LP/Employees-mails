@@ -188,6 +188,11 @@ def catch_infos(email):
         # --> /home/amait/Downloads/maildir/lokey-t/calendar/33.
         email_date = None
 
+    # subject
+    email_subject = email['Subject']
+    if len(email_subject) > 200:
+        email_subject = email_subject[:200]
+
     # is_reply
     is_reply = isReply(email['Subject'])
     
@@ -220,14 +225,14 @@ def catch_infos(email):
     #is_intern
     is_intern = isIntern(email_sender, email_recipients)
 
-    infos = [email_id, email_date, is_reply, is_intern, email_sender, email_recipients]
+    infos = [email_id, email_date, email_subject, is_reply, is_intern, email_sender, email_recipients]
     
     return infos
 
 
 def update_db(infos):
     
-    mail_id, mail_date, is_reply, is_intern, sender_address, recipients_address = infos
+    mail_id, mail_date, mail_subject, is_reply, is_intern, sender_address, recipients_address = infos
 
     try:
         sender_address_ = mailAddress.objects.get(address=sender_address)
@@ -288,6 +293,7 @@ def update_db(infos):
             '''
         mail_ = Mail(enron_id=mail_id,
                     date=mail_date,
+                    subject=mail_subject,
                     sender=sender_address_,
                     recipient=recipient_address_,
                     is_intern = is_intern,
