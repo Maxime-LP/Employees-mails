@@ -340,7 +340,8 @@ if __name__=="__main__":
                 infos = catch_infos(email)
                 try:
                     update_db(infos)
-                except Exception:
+                except Exception as e:
+                    print(e)
                     print(email_id)
             
             n = progress_info(n, prefix='Updating database:')
