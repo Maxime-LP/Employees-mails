@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 def preprocessXMLFile():
     path = os.getcwd()
-    tree = ET.parse(path + '/employes_enron.xml')
+    tree = ET.parse(path + '/employees_enron.xml')
     root = tree.getroot()
 
     for child in root:
