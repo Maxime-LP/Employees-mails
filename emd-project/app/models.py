@@ -33,7 +33,7 @@ class Mail(models.Model):
     recipient = models.ForeignKey(mailAddress,on_delete=models.CASCADE,related_name='recipient',null=False)
     is_reply = models.BooleanField(null=False)
     is_intern = models.BooleanField(null=False)
-    subject = models.CharField(max_length=120, null=True)
+    subject = models.CharField(max_length=200, null=True)
     #previous_mail = models.ForeignKey(Mail,related_name='mail',null=True)
     #next_mail = models.ForeignKey(Mail,related_name='mail',null=True)
 

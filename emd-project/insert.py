@@ -190,9 +190,8 @@ def catch_infos(email):
 
     # subject
     email_subject = email['Subject']
-    if len(email_subject) > 100:
-        print(email_subject)
-        email_subject = email_subject[:100]
+    if len(email_subject) > 200:
+        email_subject = email_subject[:200]
 
     # is_reply
     is_reply = isReply(email['Subject'])
