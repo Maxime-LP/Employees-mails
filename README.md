@@ -54,7 +54,7 @@ $ # Access the web app in browser: http://127.0.0.1:8000/
 
 > Note: To use the app, please access the registration page and create a new user. After authentication, the app will unlock the private pages.
 
-The next time you use it, everything will be ready and you just need to connect to the [*localhost:8000/*](localhost:8000/) address.
+The next time you use it, everything will be ready and you just need to connect to the [*localhost:8000/*](https://localhost:8000/) address.
 
 # Documentation
 
