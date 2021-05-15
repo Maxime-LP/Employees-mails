@@ -148,9 +148,15 @@ def couples(request):
         except ValueError:
             high_thr = 10**6
 
-    couples = Mail.objects.filter(date__gte=start_date,date__lte=end_date).values('sender','recipient')\
-                            .annotate(dcount=Count('enron_id')).order_by('-dcount')\
+    couples = Mail.objects.filter(date__gte=start_date,date__lte=end_date,is_intern=1)\
+                            .values('sender','recipient').annotate(dcount=Count('enron_id')).order_by('-dcount')\
                             .filter(dcount__gte=low_thr,dcount__lte=high_thr)
+
+    col1_ids = couples.values('sender')
+    col2_ids = couples.values('recipient')
+
+    col1_names = [User.objects.get(id =  mailAddress.objects.get( index['sender'] ).user_id ).name for index in col1_ids]
+
 
     lines = request.GET.get('lines')
     if not lines:
