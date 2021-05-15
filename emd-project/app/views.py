@@ -372,18 +372,31 @@ def profile(request):
     
     sent_per_day = Mail.objects.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
                 .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))
-
     
     
     received_per_day = Mail.objects.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
                 .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))
 
-    
-    
+        
 
     #SELECT mail FROM app_mail WHERE mail.sender_id = m.recipient_id AND mail.recipient_id = m.sender_id AND mail.date < m.date ORDER BY mail.date DESC LIMIT 1
     #average response time
     average_response_time = 0
+    sent_mails = Mail.objects.filter(sender_id__in=user_mails,is_reply=1)
+    number_of_responses = 0
+    
+    for mail in sent_mails:
+        previous_mail = Mail.objects.filter(sender_id=mail.recipient_id,recipient_id=mail.sender_id)\
+                                        .filter(date__lt=mail.date)\
+                                        .order_by('-date')[:1]
+        previous_mail = list(previous_mail)
+
+        if previous_mail != []:
+            previous_mail = previous_mail[0]
+            number_of_responses += 1
+            average_response_time += (mail.date - previous_mail.date).total_seconds()
+
+    average_response_time /= number_of_responses
 
     #I/E Ratio
 
