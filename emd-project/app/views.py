@@ -265,14 +265,20 @@ def profile(request):
     
     #mails sent / received per day
     user_mails = mailAddress.objects.filter(user_id=user.id)
+    #mailbox = Mailbox.objects.get(user_id=user.id)
+    #mails = Mail.objects.filter(box_id=mailbox.id)
     mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
     
+    #nb_of_days = list(Mail.objects.all().order_by('-date').values('date')[:1])[0]['date'] - list(Mail.objects.all().order_by('date').values('date')[:1])[0]['date']
+    #nb_of_days = nb_of_days.total_seconds()//(3600*24)
+    nb_of_days = 365*5
+
     sent_per_day = mails.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))['dcount__avg']
+                .values('time').aggregate(Count('subject'))['subject__count']/nb_of_days
     
     
     received_per_day = mails.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))['dcount__avg']
+                .values('time').aggregate(Count('subject'))['subject__count']/nb_of_days
 
 
     #average response time
@@ -294,6 +300,7 @@ def profile(request):
     if number_of_responses!=0:
         average_response_time /= number_of_responses
     
+
     #I/E Ratio
     number_of_internal_mails = mails.filter(is_intern=1).annotate(count=Count('is_intern'))
     number_of_external_mails = mails.filter(is_intern=0).annotate(count=Count('is_intern'))
