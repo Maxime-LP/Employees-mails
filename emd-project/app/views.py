@@ -98,10 +98,10 @@ def employees(request):
     try:
         mci = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
+        # If page is not an integer, delivers first page.
         mci = paginator.page(1)
     except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
+        # If page is out of range (e.g. 9999), delivers last page of results.
         mci = paginator.page(paginator.num_pages)
 
     context = {
@@ -238,7 +238,7 @@ def days(request):
     return render(request, template, context)
 
 @login_required(login_url="/login/")
-def profile(request):
+def profileold(request):
 
     template = 'profile.html'
 
@@ -334,6 +334,77 @@ def profile(request):
                'category':user.category,
                'average_sent':round(mean(list(daily_sent_mails.values())),2),
                'average_received':round(mean(list(daily_received_mails.values())),2),
+               'average_response_time':average_response_time,
+               'number_of_internal_mails':number_of_internal_mails,
+               'number_of_external_mails':number_of_external_mails,
+               'internal_contacts':internal_contacts,
+               }
+
+    return render(request, template, context)
+
+
+def profile(request):
+
+    template = 'profile.html'
+
+    name = request.GET.get('name')
+    if not name:
+        context = {'code':0}
+        return render(request, template, context)
+    
+    try:
+        user = User.objects.get(name=name)
+    except:
+        context = {'code':-1,
+                    'name':name
+                    }
+        return render(request, template, context)
+
+    if user.in_enron == False:
+        context = {'code':-2,
+                    'name':name
+                    }
+        return render(request, template, context)
+    
+    
+    #mails sent / received per day
+
+
+    sent_per_day = Mail.objects.raw(f"""SELECT m.*
+                                  FROM app_Mail AS m 
+                                  JOIN app_mailAddress AS ma 
+                                    ON ma.user_id = {user.id} 
+                                  WHERE ma.id = m.sender_id;""")
+
+    
+    
+    received_per_day = Mail.objects.raw(f"""SELECT m.* 
+                                  FROM app_Mail AS m 
+                                  JOIN app_mailAddress AS ma 
+                                    ON ma.user_id = {user.id} 
+                                  WHERE ma.id = m.recipient_id;""")
+
+    
+    
+
+    #SELECT mail FROM app_mail WHERE mail.sender_id = m.recipient_id AND mail.recipient_id = m.sender_id AND mail.date < m.date ORDER BY mail.date DESC LIMIT 1
+    #average response time
+    average_response_time = 0
+
+    #I/E Ratio
+
+    number_of_internal_mails = 0
+    number_of_external_mails = 0
+
+    #Internal contacts
+
+    internal_contacts = 0
+
+    context = {'code':1,
+               'name':name,
+               'category':user.category,
+               'average_sent':sent_per_day,
+               'average_received':received_per_day,
                'average_response_time':average_response_time,
                'number_of_internal_mails':number_of_internal_mails,
                'number_of_external_mails':number_of_external_mails,
