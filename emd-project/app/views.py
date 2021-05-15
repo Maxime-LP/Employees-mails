@@ -150,9 +150,11 @@ def couples(request):
 
     user = User.objects.all()[:3]
     couples = 0
-    '''
-    couples = User.objects.raw(f"""SELECT app_user.user1 as user1, app_user.user2 as user2, app_mail.mail, COUNT(app_mail.mail) as count FROM app_mail JOIN app_mailAddress
-                                ON app_mailAddress.user_id = user1.id""")
+    
+    couples=Mail.objects.raw(f"""SELECT sender_id, recipient_id, date, COUNT(enron_id) as count FROM app_mail 
+                        WHERE count >= low_thr, count <= high_thr, date >= {start_date} AND date <= {end_date}
+                        GROUP BY sender_id, recipient_id
+                        ORDER BY count DESC;""")
 
     lines = request.GET.get('lines')
     if not lines:
@@ -172,7 +174,7 @@ def couples(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         couples = paginator.page(paginator.num_pages)
-    '''
+    
     context = {
         "user":user,
         'couples':couples,
