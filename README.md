@@ -128,5 +128,44 @@ Within the download you'll find the following directories and files:
    |
    |-- ************************************************************************
 ```
+## Application Settings
 
+The main parameters of the application can be modified in the settings.py file in the root of the project.
+In particular, the following settings are required to use a Postgres database:
 
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # we use the postgresql adapter
+        'NAME': 'database_name',
+        'USER': 'my_username',
+        'PASSWORD': 'my_password',
+        'HOST': 'host_name',
+        'PORT': '5432',
+        'OPTIONS': {
+            'options': '-c search_path='name_of_my_schema'
+          },
+        }
+    }
+```
+
+To make it simpler, you can use a SQLite database:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME'  : 'db.sqlite3',
+      }
+   }
+```
+
+## Views and URLs
+
+To manage the views you have to modify the *views.py* files located in the directories *app* and *authentication*.
+And to manage the redirection, it happens in the *urls.py* files in the *core*, *authentication* and *app* directories.
+
+The templates are in the core directory and not in the applications directories:
+- core/include for basic templates.
+- core/layout for application *authentication*'s templates.
+- core/\*.html for application *app*'s templates.
