@@ -13,6 +13,8 @@
 
 ## Quick start
 
+Download the data at the following link: 
+
 > UNZIP the sources or clone the private repository. After getting the code, open a terminal and navigate to the working directory, with product source code.
 
 ```bash
@@ -35,11 +37,11 @@ $ # Create tables
 $ python manage.py makemigrations
 $ python manage.py migrate
 $
-$ # Init Database
+$ # Init Database 
 $ ./insert.py # Enter 1 three times, like as follows:
-$ Preprocess XML file (0/1)? 1
-$ Create pickle file (0/1)? 1
-$ Update database (0/1)? 1
+$ #Preprocess XML file (0/1)? 1
+$ #Create pickle file (0/1)? 1
+$ #Update database (0/1)? 1
 $
 $ # Start the application
 $ python manage.py runserver # default port 8000
@@ -51,6 +53,8 @@ $ # Access the web app in browser: http://127.0.0.1:8000/
 ```
 
 > Note: To use the app, please access the registration page and create a new user. After authentication, the app will unlock the private pages.
+
+The next time you use it, everything will be ready and you just need to connect to the [*localhost:8000/*](localhost:8000/) address.
 
 # Documentation
 
@@ -104,6 +108,9 @@ Within the download you'll find the following directories and files:
    |
    |-- .env                                # Inject Configuration via Environment
    |-- manage.py                           # Start the app - Django default start script
+   |
+   |-- employees_enron.xml                 # First file to process to populate the database
+   |-- headers.pkl                         # Must be created after running the insert.py script
    |
    |-- ************************************************************************
 ```
