@@ -281,8 +281,8 @@ def profile(request):
     number_of_responses = 0
     
     for mail in replies:
-        previous_mail = mails.filter(sender_id=mail.recipient_id,recipient_id=mail.sender_id)\
-                            .filter(date__lt=mail.date).order_by('-date')[:1]
+        previous_mail = mails.filter(sender_id=mail.recipient_id, recipient_id=mail.sender_id,
+                            date__lt=mail.date, subject__contains=mail.subject[4:]).order_by('-date')[:1]
 
         previous_mail = list(previous_mail)
 
@@ -305,7 +305,7 @@ def profile(request):
     internal_contacts = mailAddress.objects.filter(Q(id__in=internal_senders) | Q(id__in=internal_recipients))\
                                             .select_related('user').values('user')
     
-    internal_contacts_list = set( [User.objects.get(id=tmp['user']).name for tmp in internal_contacts if tmp['user']!=user.id] )
+    internal_contacts_list = set( [User.objects.get(id=tmp['user']).name for tmp in internal_contacts if tmp['user']!=user.id and User.objects.get(id=tmp['user']).in_enron==True ] )
 
     context = {'code':1,
                'name':name,
