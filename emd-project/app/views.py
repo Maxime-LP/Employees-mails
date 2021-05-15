@@ -279,7 +279,7 @@ def profile(request):
     average_response_time = 0
     replies = mails.filter(sender_id__in=user_mails,is_reply=1)
     number_of_responses = 0
-    """
+    
     for mail in replies:
         previous_mail = mails.filter(sender_id=mail.recipient_id,recipient_id=mail.sender_id)\
                             .filter(date__lt=mail.date).order_by('-date')[:1]
@@ -293,28 +293,29 @@ def profile(request):
 
     if number_of_responses!=0:
         average_response_time /= number_of_responses
-    """
+    
     #I/E Ratio
     number_of_internal_mails = mails.filter(is_intern=1).annotate(count=Count('is_intern'))
     number_of_external_mails = mails.filter(is_intern=0).annotate(count=Count('is_intern'))
 
     #Internal contacts
-    internal_contacts = mails.filter(is_intern=1).select_related('sender_id','recipient_id')
-    internal_contacts = User.objects.filter(id=Case(
-                When()
-                When()
-                )
-            )
+    internal_senders = mails.filter(is_intern=1).select_related('sender_id').values('sender_id')
+    internal_recipients = mails.filter(is_intern=1).select_related('recipient_id').values('recipient_id')
+
+    internal_contacts = mailAddress.objects.filter(Q(id__in=internal_senders) | Q(id__in=internal_recipients))\
+                                            .select_related('user').values('user')
+    
+    internal_contacts_list = set( [User.objects.get(id=tmp['user']).name for tmp in internal_contacts if tmp['user']!=user.id] )
 
     context = {'code':1,
                'name':name,
                'category':user.category,
                'average_sent':sent_per_day,
                'average_received':received_per_day,
-               'average_response_time':f'{average_response_time//3600}h {average_response_time//60}m',
+               'average_response_time':f'{average_response_time/3600}h',
                'number_of_internal_mails':number_of_internal_mails,
                'number_of_external_mails':number_of_external_mails,
-               'internal_contacts':internal_contacts,
+               'internal_contacts':internal_contacts_list,
                }
 
     return render(request, template, context)
