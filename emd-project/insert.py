@@ -153,8 +153,10 @@ def create_pickle(data_fp, name):
             mail_id = e.get('Message-ID')
             emails[mail_id] = {key:value for key, value in e.items()}
             emails[mail_id]['fp'] = fp
-
-
+            '''
+            regex_tag = re.compile(data_fp+r'/([a-z]*-[a-z]).*$')
+            tag = regex_tag.search(root).group(1)
+            emails[mail_id]['tag'] = tag'''
 
     print(f'Completed: {n} files have been read in {round(time()-t0,2)}s.')
 
@@ -311,7 +313,8 @@ def update_db(infos):
 
 if __name__=="__main__":
 
-    data_fp = '/users/2021ds/192009056/Téléchargements/maildir' #'/home/amait/Downloads/maildir'
+    #data_fp = '/users/2021ds/192009056/Téléchargements/maildir'
+    data_fp = '/home/amait/Downloads/maildir'
     pkl_file_name = 'headers.pkl'
     
     x = input('Preprocess XML file (0/1)? ')

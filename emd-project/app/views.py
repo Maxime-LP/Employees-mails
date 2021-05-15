@@ -41,11 +41,15 @@ def employees(request):
 
     start_date = request.GET.get('start_date')
     if not start_date:
-        start_date = '1900-01-01'
+        start_date = datetime(1900,1,1)
 
     end_date = request.GET.get('end_date')
     if not end_date:
-        end_date='2100-01-01'
+        end_date=datetime(2100,1,1)
+
+    lines = request.GET.get('lines')
+    if not lines:
+        lines = 5
     
     low_thr = request.GET.get('low_thr')
     if not low_thr:
@@ -65,47 +69,72 @@ def employees(request):
         except ValueError:
             high_thr = 10**6
 
-    user = User.objects.all()[:3]
-    '''mci = User.objects.raw(f"""select u.name, u.category, cnt.c
-                                        from app_user as u, (select sender_id, count(sender_id) as c 
-                                                             from app_mail 
-                                                             where is_intern=True and date(date) > {start_date} AND date(date) < {end_date} 
-                                                             group by sender_id) as cnt 
-                                        where cnt.sender_id = u.id and cnt.c > {low_thr} and cnt.c < {high_thr} 
-                                        ORDER BY c DESC;""")'''
-    mci = User.objects.raw(f"""select u.id, u.name, u.category, cnt.c
-                            from app_user as u, (select sender_id, count(sender_id) as c 
-                                                 from app_mail 
-                                                 where is_intern=True and date(date) > '{start_date}' and date(date) < '{end_date}'
-                                                 group by sender_id) as cnt 
-                            where cnt.sender_id = u.id and cnt.c > '{low_thr}' and cnt.c < '{high_thr}' 
-                            ORDER BY c DESC;""")
+    mci = User.objects.raw(f"""SELECT cnt.id, cnt.name, cnt.category, cnt.c
+                                FROM(
+                                    SELECT u.name AS name, u.category AS category, u.id, count(u.id) AS c
+                                    FROM app_user as u, app_mailaddress as ma, app_mail as m
+                                    WHERE u.id=ma.user_id AND ma.id=m.sender_id
+                                                         AND m.is_intern=True
+                                                         AND date(m.date) > '{start_date}'
+                                                         AND date(m.date) < '{end_date}'
 
+                                    GROUP BY u.id
+                                ) AS cnt
+                                WHERE cnt.c > {low_thr} AND cnt.c < {high_thr}
+                                ORDER BY cnt.c DESC
+                                LIMIT {lines};""")
 
-    tqr = 0
-    gib = 0
-
-    lines = request.GET.get('lines')
-    if not lines:
-        paginator = Paginator(mci, 5)
-    else:
-        try:
-            paginator = Paginator(mci, int(lines))
-        except ValueError:
-            paginator = Paginator(mci, 5)
-
-    page = request.GET.get('page')
-    try:
-        mci = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, delivers first page.
-        mci = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), delivers last page of results.
-        mci = paginator.page(paginator.num_pages)
+    tqr = User.objects.raw(f""" SELECT u.id, u.name, u.category, s.c AS sent_reply_cnt, r.c AS received_cnt, s.c*100/r.c AS ratio
+                                FROM app_user AS u,
+                                (SELECT u.id, count(u.id) AS c
+                                   FROM app_user as u, app_mailaddress as ma, app_mail as m
+                                   WHERE u.id=ma.user_id AND ma.id=m.recipient_id
+                                                         AND date(m.date) > '{start_date}'
+                                                         AND date(m.date) < '{end_date}'        
+                                   GROUP BY u.id
+                                ) AS r,
+                                (SELECT u.id, count(u.id) AS c
+                                   FROM app_user as u, app_mailaddress as ma, app_mail as m
+                                   WHERE u.id=ma.user_id AND ma.id=m.sender_id
+                                                         AND m.is_reply=True
+                                                         AND date(m.date) > '{start_date}'
+                                                         AND date(m.date) < '{end_date}'    
+                                   GROUP BY u.id
+                                ) AS s
+                                WHERE u.id=r.id AND u.id=s.id
+                                                AND s.c*100/r.c < 100
+                                                AND s.c*100/r.c > {low_thr}
+                                                AND s.c*100/r.c < {high_thr}
+                                ORDER BY ratio DESC
+                                LIMIT {lines};
+                                """)
+    
+    gib = User.objects.raw(f""" SELECT u.id, u.name, u.category, s.c AS sent_cnt, r.c AS received_cnt, s.c - r.c AS diff
+                                FROM app_user AS u,
+                                (SELECT u.name, u.category, u.id, count(u.id) AS c
+                                   FROM app_user as u, app_mailaddress as ma, app_mail as m
+                                   WHERE u.id=ma.user_id AND ma.id=m.recipient_id
+                                                         AND m.is_reply = True
+                                                         AND date(m.date) > '{start_date}'
+                                                         AND date(m.date) < '{end_date}'        
+                                   GROUP BY u.id
+                                ) AS r,
+                                (SELECT u.id, count(u.id) AS c
+                                   FROM app_user as u, app_mailaddress as ma, app_mail as m
+                                   WHERE u.id=ma.user_id AND ma.id=m.sender_id
+                                                         AND m.is_reply=False
+                                                         AND date(m.date) > '{start_date}'
+                                                         AND date(m.date) < '{end_date}'    
+                                   GROUP BY u.id
+                                ) AS s
+                                WHERE u.id=r.id AND u.id=s.id
+                                                AND s.c - r.c > {low_thr}
+                                                AND s.c - r.c < {high_thr}
+                                ORDER BY diff DESC
+                                LIMIT {lines};
+                                """)
 
     context = {
-        "user":user,
         'mci':mci,
         'tqr':tqr,
         'gib':gib,
