@@ -267,25 +267,14 @@ def profile(request):
     
     #mails sent / received per day
     user_mails = mailAddress.objects.filter(user_id=user.id)
-    """
-    try:
-        mailbox = Mailbox.objects.get(user_id=user.id)
-        mails = Mail.objects.filter(box_id=mailbox.id)
-    except:
-        mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
-    """
     mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
-    
-    #nb_of_days = list(Mail.objects.all().order_by('-date').values('date')[:1])[0]['date'] - list(Mail.objects.all().order_by('date').values('date')[:1])[0]['date']
-    #nb_of_days = nb_of_days.total_seconds()//(3600*24)
-    nb_of_days = 365*6
 
     sent_per_day = mails.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').aggregate(Count('subject'))['subject__count']/nb_of_days
+                .values('time').annotate(dcount=Count('subject')).aggregate(Avg(dcount))['dcount__avg']
     
     
     received_per_day = mails.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').aggregate(Count('subject'))['subject__count']/nb_of_days
+                .values('time').annotate(dcount=Count('subject')).aggregate(Avg(dcount))['dcount__avg']
 
 
     #average response time
