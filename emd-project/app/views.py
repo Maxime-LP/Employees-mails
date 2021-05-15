@@ -148,13 +148,9 @@ def couples(request):
         except ValueError:
             high_thr = 10**6
 
-    user = User.objects.all()[:3]
-    couples = 0
-    
-    couples=Mail.objects.raw(f"""SELECT sender_id, recipient_id, date, COUNT(enron_id) as count FROM app_mail 
-                        WHERE count >= low_thr, count <= high_thr, date >= {start_date} AND date <= {end_date}
-                        GROUP BY sender_id, recipient_id
-                        ORDER BY count DESC;""")
+    couples = Mail.objects.filter(date__gte=start_date,date__lte=end_date).values('sender','recipient')\
+                            .annotate(dcount=Count('enron_id')).order_by('-dcount')\
+                            .filter(dcount__gte=low_thr,dcount__lte=high_thr)
 
     lines = request.GET.get('lines')
     if not lines:
@@ -176,7 +172,6 @@ def couples(request):
         couples = paginator.page(paginator.num_pages)
     
     context = {
-        "user":user,
         'couples':couples,
         'start_date':start_date,
         'end_date':end_date,
@@ -270,11 +265,11 @@ def profile(request):
     mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
 
     sent_per_day = mails.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').annotate(dcount=Count('subject')).aggregate(Avg(dcount))['dcount__avg']
+                .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
     
     
     received_per_day = mails.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').annotate(dcount=Count('subject')).aggregate(Avg(dcount))['dcount__avg']
+                .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
 
 
     #average response time
