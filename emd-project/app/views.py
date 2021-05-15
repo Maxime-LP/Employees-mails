@@ -302,16 +302,13 @@ def profile(request):
     sent_per_day = mails.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
                 .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
     
-    
     received_per_day = mails.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
                 .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
-
-
+    '''
     #average response time
     average_response_time = 0
     replies = mails.filter(sender_id__in=user_mails,is_reply=1)
     number_of_responses = 0
-    
     for mail in replies:
         previous_mail = mails.filter(sender_id=mail.recipient_id, recipient_id=mail.sender_id,
                             date__lt=mail.date, subject__contains=mail.subject[4:]).order_by('-date')[:1]
@@ -325,30 +322,38 @@ def profile(request):
 
     if number_of_responses!=0:
         average_response_time /= number_of_responses
-    
+    '''
 
     #I/E Ratio
     number_of_internal_mails = mails.filter(is_intern=1).annotate(count=Count('is_intern'))
     number_of_external_mails = mails.filter(is_intern=0).annotate(count=Count('is_intern'))
 
+    '''
     #Internal contacts
     internal_senders = mails.filter(is_intern=1).select_related('sender_id').values('sender_id')
     internal_recipients = mails.filter(is_intern=1).select_related('recipient_id').values('recipient_id')
-
     internal_contacts = mailAddress.objects.filter(Q(id__in=internal_senders) | Q(id__in=internal_recipients))\
                                             .select_related('user').values('user')
-    
-    internal_contacts_list = set( [User.objects.get(id=tmp['user']).name for tmp in internal_contacts if tmp['user']!=user.id and User.objects.get(id=tmp['user']).in_enron==True ] )
+    #internal_contacts_list = set( [User.objects.get(id=tmp['user']).name for tmp in internal_contacts if tmp['user']!=user.id and User.objects.get(id=tmp['user']).in_enron==True ] )
+    #Internal contacts
+    '''
+    contacts = User.objects.raw(f"""SELECT u.id, u.name, u.category, u.in_enron, contact.id
+                                            FROM app_user AS u,
+                                                (SELECT m.recipient_id AS id FROM app_user AS u, app_mailaddress AS ma, app_mail AS m
+                                                 WHERE m.sender_id=ma.id AND ma.user_id={user.id}
+                                                 GROUP BY m.recipient_id
+                                                 ) AS contact
+                                            WHERE u.id=contact.id AND u.in_enron=True;""")
 
     context = {'code':1,
                'name':name,
                'category':user.category,
                'average_sent':round(sent_per_day,2),
                'average_received':round(received_per_day,2),
-               'average_response_time':f'{round(average_response_time/3600,2)}h',
+               'average_response_time':0,#f'{round(average_response_time/3600,2)}h',
                'number_of_internal_mails':number_of_internal_mails,
                'number_of_external_mails':number_of_external_mails,
-               'internal_contacts':internal_contacts_list,
+               'contacts':contacts,
                }
 
     return render(request, template, context)

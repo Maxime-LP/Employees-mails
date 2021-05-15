@@ -49,37 +49,6 @@
           </form>
         </div>
       </div>
-      <!--
-      {% if user != -1 %}
-      <div class="row mt-4">
-        <div class="col">
-          <div class="card shadow">
-            <div class="card-header border-0">
-              <h3 class="mt-0">Profile of {{user.name}}</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="table align-items-center table-flush">
-                <tbody>
-                  <tr> <td>Category : {{ user.category }}</td> </tr>
-                  <tr> <td>Average number of emails sent per day : {{ daily_sent_mails_mean }}</td> </tr>
-                  <tr> <td>Nombre moyen de mails reçus par jour : {{ daily_received_mails_mean }}</td> </tr>
-                  <tr> <td>I/E ratio : {{ ratio }}</td> </tr>
-
-                  {% if mean_response_time != 0%}
-                  <tr> <td>Temps de reponse moyen : {{ mean_response_time }}</td> </tr>
-                  {% endif %}
-                  
-                  {% if internal_contacts != 0%}
-                  <tr> <td>Contacts internes : {{ internal_contacts }}</td> </tr>
-                  {% endif %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endif %}-->
-
       {% if code == -1 %}
       <div class="row mt-4">
         <div class="col">
@@ -135,13 +104,51 @@
                   <tr> <td>Average number of emails sent per day: {{ average_sent}}</td> </tr>
                   <tr> <td>Average number of emails received per day: {{ average_received}}</td> </tr>
                   <tr> <td>Average response time: {{ average_response_time }}</td> </tr>
-                  <tr> <td>Intern / Extern ratio: {{ number_of_internal_mails.count  }} / {{ number_of_external_mails.count  }}</td> </tr>
-                  <tr> <td>Internal contacts: {{ internal_contacts }}</td> </tr>
-                  <!--
-                  {% if mean_response_time != 0%}
-                  <tr> <td>Temps de reponse moyen : {{ mean_response_time }}</td> </tr>
-                  {% endif %}
-                  -->
+                  <tr> <td>Intern / Extern email ratio: {{ number_of_internal_mails.count  }} / {{ number_of_external_mails.count  }}</td> </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col">
+          <div class="card shadow">
+            <div class="card-header border-0">
+              <h3 class="mt-0">Internal contacts</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-items-center table-flush">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">In Enron</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for c in contacts %}
+                  <tr>
+                    <th scope="row">
+                      <div class="media align-items-center media-body">
+                          <span class="mb-0 text-sm">{{ c.name }}</span>
+                      </div>
+                    </th>
+                    <td> {{ c.category }} </td>
+                    <td> {{ c.in_enron }} </td>
+                    <td class="text-right">
+                      <div class="dropdown">
+                        <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class="fas fa-ellipsis-v"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                          <a class="dropdown-item" href="profile?name={{ c.name }}">View profile</a>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
