@@ -1,14 +1,12 @@
 # Enron Mail Dashboard
 
-![Argon Dashboard Django - Admin Dashboard coded in Django.](https://github.com/creativetimofficial/argon-dashboard-django/blob/master/media/argon-dashboard-django-intro.gif)
+![Argon Dashboard Django - Admin Dashboard coded in Django.](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/preview.gif)
 
-<br />
 
-## Table of Contents
+# Table of Contents
 
 * [User guide](#user-guide)
 * [Documentation](#documentation)
-
 
 # User guide
 
@@ -61,14 +59,22 @@ The next time you use it, everything will be ready and you just need to connect 
 
 | Dashboard Page | Employees Page | Couples Page  | Days Page | Profile Page | Login Page | Register Page  |
 | --- | --- | ---  | --- | --- | ---  | ---  |
-| ![Dashboard Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Home.png) | ![Icons Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/icons.png?raw=true) | ![User Profile Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/user.png?raw=true) | ![Tables Page](https://raw.githubusercontent.com/creativetimofficial/public-assets/master/vue-argon-dashboard/tables.png) | ![Login Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/login.png?raw=true) | ![Register Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/register.png?raw=true) | ![Register Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/register.png?raw=true)
+| ![Dashboard Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Home.png) | ![Employees Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Employees.png) | ![Couples Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Couples.png) | ![Days Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Days.png) | ![Profile Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Profile.png) | ![Login Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Login.png) | ![Register Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Register.png)
+
+## Settings
+- Employees Page: Period, number of results, low and high thresholds.
+- Couple Page: Same as the Employees page.
+- Days Page: Period, number of results, minimum number of emails per days.
+- Profile Page: Enter the name of an Enron employee. 
 
 
 # Documentation
 
+The project was developed from the [Argon](https://github.com/creativetimofficial/vue-argon-dashboard) template. Thus, it is a web application using Django technology.
+For the installation please refer to the [Quick Start](#quick-start) section.
+
 ## File Structure
 Within the download you'll find the following directories and files:
-
 ```bash
 < PROJECT ROOT >
    |
@@ -122,3 +128,5 @@ Within the download you'll find the following directories and files:
    |
    |-- ************************************************************************
 ```
+
+
