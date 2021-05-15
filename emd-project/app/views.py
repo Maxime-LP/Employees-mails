@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django import template
 from app.models import User, mailAddress, Mail
 from django.db.models.functions import TruncMonth, ExtractMonth
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.db.models.functions import TruncDate
 from collections import defaultdict
 from django.utils.timezone import datetime
@@ -368,21 +368,15 @@ def profile(request):
     
     
     #mails sent / received per day
-
-
-    sent_per_day = Mail.objects.raw(f"""SELECT m.*
-                                  FROM app_Mail AS m 
-                                  JOIN app_mailAddress AS ma 
-                                    ON ma.user_id = {user.id} 
-                                  WHERE ma.id = m.sender_id;""")
+    user_mails = mailAddress.objects.filter(user_id=user.id)
+    
+    sent_per_day = Mail.objects.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
+                .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))
 
     
     
-    received_per_day = Mail.objects.raw(f"""SELECT m.* 
-                                  FROM app_Mail AS m 
-                                  JOIN app_mailAddress AS ma 
-                                    ON ma.user_id = {user.id} 
-                                  WHERE ma.id = m.recipient_id;""")
+    received_per_day = Mail.objects.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
+                .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))
 
     
     
