@@ -88,19 +88,24 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for u in user %}
+                  {% for couple in couples %}
                   <tr>
                     <th scope="row">
                       <div class="media align-items-center media-body">
-                          <span class="mb-0 text-sm">{{ u.name }} ({{ u.category }})</span>
+                          <span class="mb-0 text-sm">{{ couple.sender }} ({{ user.category }})</span>
                       </div>
                     </th>
                     <th scope="row">
                       <div class="media align-items-center media-body">
-                          <span class="mb-0 text-sm">{{ u.name }}  ({{ u.category }})</span>
+                          <span class="mb-0 text-sm">{{ couple.recipient }}  ({{ user.category }})</span>
                       </div>
                     </th>
-                    <td> {{ u.inEnron }} </td>
+                    <th scope="row">
+                      <div class="media align-items-center media-body">
+                          <span class="mb-0 text-sm">{{ couple.dcount }}</span>
+                      </div>
+                    </th>
+                    <td> {{ user.inEnron }} </td>
                   </tr>
                   {% endfor %}
                 </tbody>

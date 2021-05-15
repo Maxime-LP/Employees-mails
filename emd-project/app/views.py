@@ -177,11 +177,15 @@ def couples(request):
         except ValueError:
             high_thr = 10**6
 
-    user = User.objects.all()[:3]
-    couples = 0
-    '''
-    couples = User.objects.raw(f"""SELECT app_user.user1 as user1, app_user.user2 as user2, app_mail.mail, COUNT(app_mail.mail) as count FROM app_mail JOIN app_mailAddress
-                                ON app_mailAddress.user_id = user1.id""")
+    couples = Mail.objects.filter(date__gte=start_date,date__lte=end_date,is_intern=1)\
+                            .values('sender','recipient').annotate(dcount=Count('enron_id')).order_by('-dcount')\
+                            .filter(dcount__gte=low_thr,dcount__lte=high_thr)
+
+    col1_ids = couples.values('sender')
+    col2_ids = couples.values('recipient')
+
+    col1_names = [User.objects.get(id =  mailAddress.objects.get( index['sender'] ).user_id ).name for index in col1_ids]
+
 
     lines = request.GET.get('lines')
     if not lines:
@@ -201,9 +205,8 @@ def couples(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         couples = paginator.page(paginator.num_pages)
-    '''
+    
     context = {
-        "user":user,
         'couples':couples,
         'start_date':start_date,
         'end_date':end_date,
@@ -294,25 +297,14 @@ def profile(request):
     
     #mails sent / received per day
     user_mails = mailAddress.objects.filter(user_id=user.id)
-    """
-    try:
-        mailbox = Mailbox.objects.get(user_id=user.id)
-        mails = Mail.objects.filter(box_id=mailbox.id)
-    except:
-        mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
-    """
     mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
-    
-    #nb_of_days = list(Mail.objects.all().order_by('-date').values('date')[:1])[0]['date'] - list(Mail.objects.all().order_by('date').values('date')[:1])[0]['date']
-    #nb_of_days = nb_of_days.total_seconds()//(3600*24)
-    nb_of_days = 365*6
 
     sent_per_day = mails.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').aggregate(Count('subject'))['subject__count']/nb_of_days
+                .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
     
     
     received_per_day = mails.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').aggregate(Count('subject'))['subject__count']/nb_of_days
+                .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
 
 
     #average response time
