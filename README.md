@@ -6,10 +6,11 @@
 
 ## Table of Contents
 
-* [Quick Start](#quick-start)
+* [User guide](#user-guide)
 * [Documentation](#documentation)
 
-<br />
+
+# User guide
 
 ## Quick start
 
@@ -49,12 +50,19 @@ $
 $ # Or start the app with custom port
 $ # python manage.py runserver 0.0.0.0:<your_port>
 $
-$ # Access the web app in browser: http://127.0.0.1:8000/
+$ # Access the web app in browser: http://127.0.0.1:8000/ or http://localhost:7000/
 ```
 
 > Note: To use the app, please access the registration page and create a new user. After authentication, the app will unlock the private pages.
 
-The next time you use it, everything will be ready and you just need to connect to the [*localhost:8000/*](https://localhost:8000/) address.
+The next time you use it, everything will be ready and you just need to connect to the web app.
+
+## Preview page
+
+| Dashboard Page | Employees Page | Couples Page  | Days Page | Profile Page | Login Page | Register Page  |
+| --- | --- | ---  | --- | --- | ---  | ---  |
+| ![Dashboard Page](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/Home.png) | ![Icons Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/icons.png?raw=true) | ![User Profile Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/user.png?raw=true) | ![Tables Page](https://raw.githubusercontent.com/creativetimofficial/public-assets/master/vue-argon-dashboard/tables.png) | ![Login Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/login.png?raw=true) | ![Register Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/register.png?raw=true) | ![Register Page](https://github.com/creativetimofficial/public-assets/blob/master/vue-argon-dashboard/register.png?raw=true)
+
 
 # Documentation
 
