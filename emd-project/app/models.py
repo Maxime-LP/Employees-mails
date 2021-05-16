@@ -34,8 +34,6 @@ class Mail(models.Model):
     is_reply = models.BooleanField(null=False)
     is_intern = models.BooleanField(null=False)
     subject = models.CharField(max_length=200, null=True)
-    #previous_mail = models.ForeignKey(Mail,related_name='mail',null=True)
-    #next_mail = models.ForeignKey(Mail,related_name='mail',null=True)
 
     def __str__(self):
         return f"{self.enron_id}, {self.date}, {self.sender.address}, {self.recipient.address}, {self.is_reply}, {self.is_intern}"

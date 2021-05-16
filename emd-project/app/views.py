@@ -178,15 +178,9 @@ def couples(request):
             high_thr = 10**6
 
     couples = Mail.objects.filter(date__gte=start_date,date__lte=end_date,is_intern=1)\
-                            .values('sender','recipient').annotate(dcount=Count('enron_id')).order_by('-dcount')\
-                            .filter(dcount__gte=low_thr,dcount__lte=high_thr)
-
-    col1_ids = couples.values('sender')
-    col2_ids = couples.values('recipient')
-
-    col1_names = [User.objects.get(id =  mailAddress.objects.get( index['sender'] ).user_id ).name for index in col1_ids]
-
-
+                            .values('sender_id__user_id__name','recipient_id__user_id__name')\
+                            .annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=low_thr,dcount__lte=high_thr)
+    
     lines = request.GET.get('lines')
     if not lines:
         paginator = Paginator(couples, 5)
@@ -294,49 +288,57 @@ def profile(request):
                     }
         return render(request, template, context)
     
+    response_time = request.GET.get('response_time')
+    if not response_time:
+        response_time = 0
+    else:
+        try:
+            response_time = int(response_time)
+        except ValueError:
+            response_time = 0
+    
     
     #mails sent / received per day
     user_mails = mailAddress.objects.filter(user_id=user.id)
     mails = Mail.objects.filter(Q(sender_id__in=user_mails)|Q(recipient_id__in=user_mails))
 
     sent_per_day = mails.filter(sender_id__in=user_mails).annotate(time=TruncDate('date'))\
-                .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
+                .values('time').annotate(dcount=Count('enron_id')).aggregate(Avg('dcount'))['dcount__avg']
     
     received_per_day = mails.filter(recipient_id__in=user_mails).annotate(time=TruncDate('date'))\
                 .values('time').annotate(dcount=Count('subject')).aggregate(Avg('dcount'))['dcount__avg']
-    '''
+
+    if sent_per_day is None:
+        sent_per_day = 0
+    if received_per_day is None:
+        received_per_day = 0
+    
+    
     #average response time
     average_response_time = 0
-    replies = mails.filter(sender_id__in=user_mails,is_reply=1)
-    number_of_responses = 0
-    for mail in replies:
-        previous_mail = mails.filter(sender_id=mail.recipient_id, recipient_id=mail.sender_id,
-                            date__lt=mail.date, subject__contains=mail.subject[4:]).order_by('-date')[:1]
+    if response_time==1:
+        replies = mails.filter(sender_id__in=user_mails,is_reply=1)
+        number_of_responses = 0
+        for mail in replies:
+            previous_mail = mails.filter(sender_id=mail.recipient_id, recipient_id=mail.sender_id,
+                                date__lt=mail.date, subject__contains=mail.subject[4:]).order_by('-date')[:1]
 
-        previous_mail = list(previous_mail)
+            previous_mail = list(previous_mail)
 
-        if previous_mail != []:
-            previous_mail = previous_mail[0]
-            number_of_responses += 1
-            average_response_time += (mail.date - previous_mail.date).total_seconds()
+            if previous_mail != []:
+                previous_mail = previous_mail[0]
+                number_of_responses += 1
+                average_response_time += (mail.date - previous_mail.date).total_seconds()
 
-    if number_of_responses!=0:
-        average_response_time /= number_of_responses
-    '''
+        if number_of_responses!=0:
+            average_response_time /= number_of_responses
 
     #I/E Ratio
     number_of_internal_mails = mails.filter(is_intern=1).annotate(count=Count('is_intern'))
     number_of_external_mails = mails.filter(is_intern=0).annotate(count=Count('is_intern'))
 
-    '''
+    
     #Internal contacts
-    internal_senders = mails.filter(is_intern=1).select_related('sender_id').values('sender_id')
-    internal_recipients = mails.filter(is_intern=1).select_related('recipient_id').values('recipient_id')
-    internal_contacts = mailAddress.objects.filter(Q(id__in=internal_senders) | Q(id__in=internal_recipients))\
-                                            .select_related('user').values('user')
-    #internal_contacts_list = set( [User.objects.get(id=tmp['user']).name for tmp in internal_contacts if tmp['user']!=user.id and User.objects.get(id=tmp['user']).in_enron==True ] )
-    #Internal contacts
-    '''
     contacts = User.objects.raw(f"""SELECT u.id, u.name, u.category, u.in_enron, contact.id
                                             FROM app_user AS u,
                                                 (SELECT m.recipient_id AS id FROM app_user AS u, app_mailaddress AS ma, app_mail AS m
@@ -350,7 +352,7 @@ def profile(request):
                'category':user.category,
                'average_sent':round(sent_per_day,2),
                'average_received':round(received_per_day,2),
-               'average_response_time':0,#f'{round(average_response_time/3600,2)}h',
+               'average_response_time':f'{round(average_response_time/3600,2)}h',
                'number_of_internal_mails':number_of_internal_mails,
                'number_of_external_mails':number_of_external_mails,
                'contacts':contacts,
