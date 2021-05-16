@@ -17,7 +17,7 @@
       <div class="row">
         <div class="col">
           <div class="card bg-secondary shadow">
-            <form action="/employees" method="get">
+            <form action="/couples" method="get">
               <div class="card-header bg-white border-0">
                 <div class="row align-items-center">
                   <div class="col-8">
@@ -83,7 +83,9 @@
                 <thead class="thead-light">
                   <tr>
                     <th scope="col">Employee 1</th>
+                    <th scope="col">Category</th>
                     <th scope="col">Employee 2</th>
+                    <th scope="col">Category</th>
                     <th scope="col"># mails</th>
                   </tr>
                 </thead>
@@ -95,11 +97,13 @@
                           <span class="mb-0 text-sm">{{ couple.sender_id__user_id__name }}</span>
                       </div>
                     </th>
+                    <td>{{ couple.sender_id__user_id__category }}</td>
                     <th scope="row">
                       <div class="media align-items-center media-body">
                           <span class="mb-0 text-sm">{{ couple.recipient_id__user_id__name }}</span>
                       </div>
                     </th>
+                    <td>{{ couple.recipient_id__user_id__category }}</td>
                     <th scope="row">
                       <div class="media align-items-center media-body">
                           <span class="mb-0 text-sm">{{ couple.dcount }}</span>

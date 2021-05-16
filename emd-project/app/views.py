@@ -10,12 +10,10 @@ from django.template import loader
 from django.http import HttpResponse
 from django import template
 from app.models import User, mailAddress, Mail
-from django.db.models.functions import TruncMonth, ExtractMonth
 from django.db.models import Count, Avg, Q, Case, When
 from django.db.models.functions import TruncDate
-from collections import defaultdict
 from django.utils.timezone import datetime
-from numpy import mean
+
 
 @login_required(login_url="/login/")
 def index(request):
@@ -33,6 +31,7 @@ def index(request):
                'intern_exchange':round(intern_exchange,1),}
 
     return render(request, template, context)
+
 
 @login_required(login_url="/login/")
 def employees(request):
@@ -146,6 +145,7 @@ def employees(request):
 
     return render(request, template, context)
 
+
 @login_required(login_url="/login/")
 def couples(request):
     
@@ -158,6 +158,15 @@ def couples(request):
     end_date = request.GET.get('end_date')
     if not end_date:
         end_date = datetime(2100,1,1)
+
+    lines = request.GET.get('lines')
+    if not lines:
+        lines = 5
+    else:
+        try:
+            lines = int(lines)
+        except ValueError:
+            lines = 5
     
     low_thr = request.GET.get('low_thr')
     if not low_thr:
@@ -178,28 +187,8 @@ def couples(request):
             high_thr = 10**6
 
     couples = Mail.objects.filter(date__gte=start_date,date__lte=end_date,is_intern=1)\
-                            .values('sender_id__user_id__name','recipient_id__user_id__name')\
-                            .annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=low_thr,dcount__lte=high_thr)
-    
-    lines = request.GET.get('lines')
-    if not lines:
-        paginator = Paginator(couples, 5)
-    else:
-        try:
-            paginator = Paginator(couples, int(lines))
-        except ValueError:
-            paginator = Paginator(couples, 5)
-
-    page = request.GET.get('page')
-    try:
-        couples = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        couples = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        couples = paginator.page(paginator.num_pages)
-    
+                            .values('sender_id__user_id__name','sender_id__user_id__category','recipient_id__user_id__name','recipient_id__user_id__category')\
+                            .annotate(dcount=Count('enron_id')).order_by('-dcount').filter(dcount__gte=low_thr,dcount__lte=high_thr)[:lines]
     context = {
         'couples':couples,
         'start_date':start_date,
@@ -209,6 +198,7 @@ def couples(request):
         }
 
     return render(request, template, context)
+
 
 @login_required(login_url="/login/")
 def days(request):
@@ -263,6 +253,7 @@ def days(request):
         }
 
     return render(request, template, context)
+
 
 @login_required(login_url="/login/")
 def profile(request):
