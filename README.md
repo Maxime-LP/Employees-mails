@@ -159,6 +159,9 @@ DATABASES = {
       }
    }
 ```
+You can find the models of the applications in *authentication/models.py* and *app/models.py*. The database schema of application *app* is as follows:
+
+![Schema BDD](https://github.com/Maxime-LP/Employees-mails/blob/main/img_readme/bdd_model.png)
 
 ## Views and URLs
 
