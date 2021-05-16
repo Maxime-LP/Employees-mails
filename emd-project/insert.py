@@ -341,7 +341,7 @@ if __name__=="__main__":
                     update_db(infos)
                 except Exception as e:
                     print(e)
-                    error += 1
+                    errors += 1
                     print(f"# errors: {errors}", end='\r')
                     with open("update_errors.txt", "a") as filout:
                         filout.write(f'{email_id}\n')
